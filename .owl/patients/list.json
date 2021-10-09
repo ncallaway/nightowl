@@ -1,0 +1,16 @@
+{
+  "url": "http://www.google.com",
+  "description": "list all patients",
+  "method": "get",
+  "parameters": [
+    {
+      "name": "q",
+      "value": "doe"
+    },
+    {
+      "name": "first",
+      "value": "john",
+      "disabled": true
+    }
+  ]
+}
