@@ -1,7 +1,5 @@
 #! /usr/bin/env node
 
-const main = async () => {
-  console.log("hello world");
-};
+import { main } from "./cli/main";
 
 main();

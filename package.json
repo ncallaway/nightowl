@@ -16,6 +16,7 @@
     "@babel/preset-env": "^7.15.8",
     "@babel/preset-typescript": "^7.15.0",
     "@types/jest": "^27.0.2",
+    "@types/mkdirp": "^1.0.2",
     "@types/node": "^16.10.3",
     "babel-jest": "^27.2.4",
     "jest": "^27.2.4",
@@ -25,6 +26,8 @@
   "author": "Noah Callaway",
   "license": "UNLICENSED",
   "dependencies": {
-    "neverthrow": "^4.2.2"
+    "mkdirp": "^1.0.4",
+    "neverthrow": "^4.2.2",
+    "node-libcurl": "^2.3.3"
   }
 }
