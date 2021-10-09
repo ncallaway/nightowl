@@ -58,12 +58,12 @@ owl env create local # create a new environment named `local`
 owl env list # list all environments
 owl env default local # set the local environment to be the saved default
 owl env use staging # use the staging environment for all subsequent calls within this shell
-owl env set local host="http://localhost:3000" token='token'
-owl env set staging host="http://staging.example.com"
-own env set staging --private token='my-secret-token'
-owl env set local some.key='{"json":true}'
-owl env set local '{"host": "http://localhost:3000}", "token": "token", "some": { "key": false } }'
-owl env unset local some.key token
+owl env put local host="http://localhost:3000" token='token'
+owl env put staging host="http://staging.example.com"
+own env put staging --private token='my-secret-token'
+owl env put local some.key='{"json":true}'
+owl env patch local '{"host": "http://localhost:3000}", "token": "token", "some": { "key": false } }'
+owl env patch local --unset some.key --unset token
 owl env rm staging
 owl env print local
 owl env print local --show-private
@@ -72,12 +72,13 @@ owl env print local --show-private
 owl state create test:1
 owl state use test:1
 owl state clear test:1
-owl state set test:1 jwt="eyJhbGciOiJIUzI1NiIs..."
-owl state set test:1 jwt="eyJhbGciOiJIUzI1NiIs..."
+owl state pathc test:1 jwt="eyJhbGciOiJIUzI1NiIs..."
+owl state post test:1 jwt="eyJhbGciOiJIUzI1NiIs..."
 
 owl state clear --cookies test:1
 
-owl state set --cookie test:1 response='bar'
+owl state set-cookie test:1 response='bar'
+owl state unset-cookie test:1 response
 ```
 
 ## Design Goals
