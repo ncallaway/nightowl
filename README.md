@@ -21,6 +21,10 @@ owl as curl patients/list --env staging # print the curl request
 owl copy curl patients/list --env production # print and copy to the clipboard the currequest
 owl curl patients/list --env production -- -H 'Accept: application/json' # issue a patients/list request by actually running curl
 owl show patients/list
+owl export insomnia [outfile]
+owl export postman [outfile]
+owl import insomnia [infile]
+owl import postman [infile]
 
 
 # creating requests

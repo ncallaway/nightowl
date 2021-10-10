@@ -36,10 +36,12 @@ export const main = async () => {
     }
   }
 
-  console.log("cmd: ", cmd);
+
 
   if (cmd.run) {
     cmd.run();
+  } else {
+    console.log("(no-run for cmd) ", cmd);
   }
 
   // const remaining = argv.slice(2);

@@ -1,6 +1,7 @@
-import { existsSync, fstat } from "fs";
+import { existsSync } from "fs";
 import { readdir, readFile } from "fs/promises";
-import { files } from "..";
+import { err, ok, Result } from "neverthrow";
+import { files } from "../lib/files";
 
 export type EnvironmentSummary = {
   name: string;
@@ -26,13 +27,13 @@ const summaryFor = async (env: string): Promise<EnvironmentSummary> => {
   };
 };
 
-const defaultEnvironment = async (): Promise<string | null> => {
+const defaultEnvironment = async (): Promise<Result<string, string>> => {
   // get the configured default
   try {
     const config = await readFile(files.envConfigPath(), "utf-8");
     const configResult = JSON.parse(config);
     if (configResult.default && (await environmentExists(configResult.default))) {
-      return configResult.default;
+      return ok(configResult.default);
     }
   } catch (err) {}
 
@@ -40,16 +41,16 @@ const defaultEnvironment = async (): Promise<string | null> => {
   const envs = await listSummary();
 
   if (envs.length) {
-    return envs[0].name;
+    return ok(envs[0].name);
   }
 
   // no default is available
-  return null;
+  return err("No default environment exists");
 };
 
-const activeEnvironment = async (): Promise<string | null> => {
+const activeEnvironment = async (): Promise<Result<string, string>> => {
   if (process.env.OWL_ENV && (await environmentExists(process.env.OWL_ENV))) {
-    return process.env.OWL_ENV;
+    return ok(process.env.OWL_ENV);
   }
 
   return defaultEnvironment();
@@ -68,7 +69,7 @@ const environmentExists = async (env: string): Promise<boolean> => {
 };
 
 const isValidEnvironmentName = (env: string): boolean => {
-  return true;
+  return files.isValidUserPathComponent(env);
 };
 
 export const env = {

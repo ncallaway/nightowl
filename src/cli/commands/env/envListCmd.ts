@@ -6,11 +6,13 @@ import { Command } from "../command";
 import signale from "signale";
 import chalk from "chalk";
 import { env } from "../../../core";
+import { Result } from "neverthrow";
 
 const run = async () => {
   const envs = await env.listSummary();
 
-  const def = await env.defaultEnvironment();
+  const resDef: Result<string | null, string> = await env.defaultEnvironment();
+  const def = resDef.unwrapOr(null);
 
   for (const env of envs) {
     const name = env.name;
