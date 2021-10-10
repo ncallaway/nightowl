@@ -8,33 +8,57 @@ import { RenderedRequest } from "../core/insomniaTypes";
 import { Network } from "../core/network";
 import { State } from "../core/types";
 
+import commandLineArgs from "command-line-args";
+import { Commands } from "./commands/command";
+
 export const main = async () => {
-  const remaining = argv.slice(2);
-  if (remaining.length == 0) {
-    console.log("usage instructions?");
+  if (argv.length <= 2) {
+    console.log("need at least 1 argument");
     process.exit(1);
   }
 
-  const requestKey = remaining.shift() as string;
+  let args = argv.slice(2);
+  /* first - parse the main command name */
 
-  console.log("request is: ", requestKey);
+  let cmd = Commands.RootCommand;
+  let mainDefinitions = [{ name: "name", defaultOption: true }];
 
-  const requestDefinition = await loadRequest(requestKey);
+  while (cmd.subcommands) {
+    const cmdArgs = commandLineArgs(mainDefinitions, { argv: args, stopAtFirstUnknown: true });
+    args = cmdArgs._unknown || [];
 
-  let envStr = "local";
+    const child = Commands.getChildCommand(cmd, cmdArgs.name);
 
-  if (remaining.length) {
-    envStr = remaining.shift() as string;
+    if (child) {
+      cmd = child;
+    } else {
+      break;
+    }
   }
 
-  const env = await loadEnv(envStr);
-  const state: State = {};
+  console.log("cmd: ", cmd);
 
-  const renderedRequest = await renderRequest(requestDefinition, env, state);
+  if (cmd.run) {
+    cmd.run();
+  }
 
-  const requestResult = await issueRequest(renderedRequest);
-
-  console.log("response status: ", requestResult);
+  // const remaining = argv.slice(2);
+  // if (remaining.length == 0) {
+  //   console.log("usage instructions?");
+  //   process.exit(1);
+  // }
+  // const requestKey = remaining.shift() as string;
+  // console.log("request is: ", requestKey);
+  // const requestDefinition = await loadRequest(requestKey);
+  // let envStr = "local";
+  // if (remaining.length) {
+  //   envStr = remaining.shift() as string;
+  // }
+  // const env = await loadEnv(envStr);
+  // const state: State = {};
+  // const renderedRequest = await renderRequest(requestDefinition, env, state);
+  // const requestResult = await issueRequest(renderedRequest);
+  // console.log("response status: ", requestResult);
 };
 
 const issueRequest = (rendered: RenderedRequest): Promise<number> => Network.performRequest(rendered);
