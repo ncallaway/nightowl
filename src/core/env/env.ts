@@ -1,7 +1,7 @@
 import { existsSync } from "fs";
 import { readdir, readFile, writeFile } from "fs/promises";
 import { err, ok, Result } from "neverthrow";
-import { files } from "../lib/files";
+import { paths, files } from "../lib/files";
 
 export type EnvironmentSummary = {
   name: string;
@@ -15,27 +15,26 @@ const setDefault = async (env: string): Promise<Result<undefined, string>> => {
     return err("The provided environment doesn't exist");
   }
 
-  // handle:
-
-  // - config doesn't exist
-  // - read fails
-  // - config cannot be parsed
-  // - write fails
-
   // read config file
-  const rawConfig = await readFile(files.envConfigPath(), "utf-8");
-  let config = JSON.parse(rawConfig) || {};
+  const resJson = await files.readJson(paths.envConfigPath());
 
+  if (resJson.isErr()) {
+    return err(resJson.error);
+  }
+
+  const config = resJson.value;
   config.default = env;
 
-  // write config file
-  await writeFile(files.envConfigPath(), JSON.stringify(config), "utf-8");
+  const resWrite = await files.writeJson(paths.envConfigPath(), config);
+  if (resWrite.isErr()) {
+    return err(resWrite.error);
+  }
 
   return ok(undefined);
 };
 
 const listSummary = async (): Promise<EnvironmentSummary[]> => {
-  const results = await readdir(files.envDir(), { withFileTypes: true });
+  const results = await readdir(paths.envDir(), { withFileTypes: true });
 
   const envNames = results
     .filter((dirent) => dirent.isFile())
@@ -55,7 +54,7 @@ const summaryFor = async (env: string): Promise<EnvironmentSummary> => {
 const getDefault = async (): Promise<Result<string, string>> => {
   // get the configured default
   try {
-    const config = await readFile(files.envConfigPath(), "utf-8");
+    const config = await readFile(paths.envConfigPath(), "utf-8");
     const configResult = JSON.parse(config);
     if (configResult.default && (await exists(configResult.default))) {
       return ok(configResult.default);
@@ -86,7 +85,7 @@ const exists = async (env: string): Promise<boolean> => {
     return false;
   }
 
-  if (existsSync(files.envPath(env))) {
+  if (existsSync(paths.envPath(env))) {
     return true;
   }
 
@@ -94,7 +93,7 @@ const exists = async (env: string): Promise<boolean> => {
 };
 
 const isValidEnvironmentName = (env: string): boolean => {
-  return files.isValidUserPathComponent(env);
+  return paths.isValidUserPathComponent(env);
 };
 
 export const env = {
@@ -103,5 +102,6 @@ export const env = {
   setDefault,
   getDefault,
   getActive,
+  isValidEnvironmentName,
   exists,
 };

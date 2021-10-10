@@ -17,9 +17,6 @@ const run = async (args: CommandLineOptions) => {
   } else {
     console.log("Failed to update default: ", result.error);
   }
-
-
-
 };
 
 export const EnvDefaultCommand: Command = {
