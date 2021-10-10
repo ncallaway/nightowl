@@ -1,9 +1,11 @@
+import { CommandLineOptions, OptionDefinition } from "command-line-args";
 import { EnvCommand } from "./env/envCmd";
 import { RequestCommand } from "./request/requestCmd";
 
 export type Command = {
   name: string;
-  run?: () => Promise<void>;
+  options?: OptionDefinition[];
+  run?: (args: CommandLineOptions) => Promise<void>;
   subcommands?: Subcommand;
 };
 

@@ -1,5 +1,5 @@
 import { existsSync } from "fs";
-import { readdir, readFile } from "fs/promises";
+import { readdir, readFile, writeFile } from "fs/promises";
 import { err, ok, Result } from "neverthrow";
 import { files } from "../lib/files";
 
@@ -7,6 +7,31 @@ export type EnvironmentSummary = {
   name: string;
   warnings?: string[];
   errors?: string[];
+};
+
+const setDefault = async (env: string): Promise<Result<undefined, string>> => {
+  if (!(await exists(env))) {
+    // write to config...
+    return err("The provided environment doesn't exist");
+  }
+
+  // handle:
+
+  // - config doesn't exist
+  // - read fails
+  // - config cannot be parsed
+  // - write fails
+
+  // read config file
+  const rawConfig = await readFile(files.envConfigPath(), "utf-8");
+  let config = JSON.parse(rawConfig) || {};
+
+  config.default = env;
+
+  // write config file
+  await writeFile(files.envConfigPath(), JSON.stringify(config), "utf-8");
+
+  return ok(undefined);
 };
 
 const listSummary = async (): Promise<EnvironmentSummary[]> => {
@@ -27,12 +52,12 @@ const summaryFor = async (env: string): Promise<EnvironmentSummary> => {
   };
 };
 
-const defaultEnvironment = async (): Promise<Result<string, string>> => {
+const getDefault = async (): Promise<Result<string, string>> => {
   // get the configured default
   try {
     const config = await readFile(files.envConfigPath(), "utf-8");
     const configResult = JSON.parse(config);
-    if (configResult.default && (await environmentExists(configResult.default))) {
+    if (configResult.default && (await exists(configResult.default))) {
       return ok(configResult.default);
     }
   } catch (err) {}
@@ -48,15 +73,15 @@ const defaultEnvironment = async (): Promise<Result<string, string>> => {
   return err("No default environment exists");
 };
 
-const activeEnvironment = async (): Promise<Result<string, string>> => {
-  if (process.env.OWL_ENV && (await environmentExists(process.env.OWL_ENV))) {
+const getActive = async (): Promise<Result<string, string>> => {
+  if (process.env.OWL_ENV && (await exists(process.env.OWL_ENV))) {
     return ok(process.env.OWL_ENV);
   }
 
-  return defaultEnvironment();
+  return getDefault();
 };
 
-const environmentExists = async (env: string): Promise<boolean> => {
+const exists = async (env: string): Promise<boolean> => {
   if (!isValidEnvironmentName(env)) {
     return false;
   }
@@ -75,7 +100,8 @@ const isValidEnvironmentName = (env: string): boolean => {
 export const env = {
   listSummary,
   summaryFor,
-  defaultEnvironment,
-  activeEnvironment,
-  environmentExists,
+  setDefault,
+  getDefault,
+  getActive,
+  exists,
 };

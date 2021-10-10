@@ -21,13 +21,13 @@ export const main = async () => {
   /* first - parse the main command name */
 
   let cmd = Commands.RootCommand;
-  let mainDefinitions = [{ name: "name", defaultOption: true }];
+  let mainDefinitions = [{ name: "cmd", defaultOption: true }];
 
   while (cmd.subcommands) {
     const cmdArgs = commandLineArgs(mainDefinitions, { argv: args, stopAtFirstUnknown: true });
     args = cmdArgs._unknown || [];
 
-    const child = Commands.getChildCommand(cmd, cmdArgs.name);
+    const child = Commands.getChildCommand(cmd, cmdArgs.cmd);
 
     if (child) {
       cmd = child;
@@ -36,10 +36,15 @@ export const main = async () => {
     }
   }
 
-
+  // do a final cli processing for the command
 
   if (cmd.run) {
-    cmd.run();
+    let cmdArgs = {};
+    if (cmd.options) {
+      cmdArgs = commandLineArgs(cmd.options, { argv: args });
+    }
+    console.log("cmdArgs are: ", cmdArgs);
+    cmd.run(cmdArgs);
   } else {
     console.log("(no-run for cmd) ", cmd);
   }
