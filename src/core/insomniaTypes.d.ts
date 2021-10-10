@@ -17,3 +17,12 @@ export interface RequestDefinition {
   settingRebuildPath: boolean;
   settingFollowRedirects: "on" | "off" | "global";
 }
+
+export type RenderedRequest = RequestDefinition & {
+  cookies: {
+    name: string;
+    values: string;
+    disabled?: boolean;
+  }[];
+  cookieJar: any;
+};

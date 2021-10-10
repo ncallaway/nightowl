@@ -4,8 +4,9 @@ import fs from "fs";
 import path from "path";
 import { RequestDefinition } from ".";
 import cluster from "cluster";
+import { RenderedRequest } from "./insomniaTypes";
 
-const performRequest = (definition: RequestDefinition): Promise<number> => {
+const performRequest = (definition: RenderedRequest): Promise<number> => {
   return new Promise((resolve, reject) => {
     console.log("issuing request: ", definition);
 

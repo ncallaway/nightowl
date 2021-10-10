@@ -17,8 +17,10 @@
     "@babel/preset-env": "^7.15.8",
     "@babel/preset-typescript": "^7.15.0",
     "@types/jest": "^27.0.2",
+    "@types/lodash": "^4.14.175",
     "@types/mkdirp": "^1.0.2",
     "@types/node": "^16.10.3",
+    "@types/nunjucks": "^3.2.0",
     "babel-jest": "^27.2.4",
     "jest": "^27.2.4",
     "ts-node": "^10.2.1",
@@ -27,8 +29,10 @@
   "author": "Noah Callaway",
   "license": "UNLICENSED",
   "dependencies": {
+    "lodash": "^4.17.21",
     "mkdirp": "^1.0.4",
     "neverthrow": "^4.2.2",
-    "node-libcurl": "^2.3.3"
+    "node-libcurl": "^2.3.3",
+    "nunjucks": "^3.2.3"
   }
 }
