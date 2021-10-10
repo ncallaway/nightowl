@@ -1,4 +1,4 @@
-import { env } from "../../src/core";
+import { env } from "../../../src/core";
 
 describe("env", () => {
   describe("isValidEnvironmentName", () => {

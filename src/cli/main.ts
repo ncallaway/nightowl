@@ -43,7 +43,6 @@ export const main = async () => {
     if (cmd.options) {
       cmdArgs = commandLineArgs(cmd.options, { argv: args });
     }
-    console.log("cmdArgs are: ", cmdArgs);
     cmd.run(cmdArgs);
   } else {
     console.log("(no-run for cmd) ", cmd);

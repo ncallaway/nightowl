@@ -1,13 +1,8 @@
-import { existsSync } from "fs";
-import { readdir, readFile, writeFile } from "fs/promises";
+import { readFile } from "fs/promises";
 import { err, ok, Result } from "neverthrow";
-import { paths, files } from "../lib/files";
-
-export type EnvironmentSummary = {
-  name: string;
-  warnings?: string[];
-  errors?: string[];
-};
+import { files, paths } from "../lib/files";
+import { isValidEnvironmentName } from "./isValidEnvironmentName";
+import { listSummary, summaryFor } from "./listSummary";
 
 const setDefault = async (env: string): Promise<Result<undefined, string>> => {
   if (!(await exists(env))) {
@@ -31,24 +26,6 @@ const setDefault = async (env: string): Promise<Result<undefined, string>> => {
   }
 
   return ok(undefined);
-};
-
-const listSummary = async (): Promise<EnvironmentSummary[]> => {
-  const results = await readdir(paths.envDir(), { withFileTypes: true });
-
-  const envNames = results
-    .filter((dirent) => dirent.isFile())
-    .filter((dirent) => dirent.name.endsWith(".json"))
-    .map((dirent) => dirent.name.substring(0, dirent.name.length - 5))
-    .sort((a, b) => a.localeCompare(b));
-
-  return Promise.all(envNames.map(summaryFor));
-};
-
-const summaryFor = async (env: string): Promise<EnvironmentSummary> => {
-  return {
-    name: env,
-  };
 };
 
 const getDefault = async (): Promise<Result<string, string>> => {
@@ -85,15 +62,9 @@ const exists = async (env: string): Promise<boolean> => {
     return false;
   }
 
-  if (existsSync(paths.envPath(env))) {
-    return true;
-  }
+  const all = await listSummary();
 
-  return false;
-};
-
-const isValidEnvironmentName = (env: string): boolean => {
-  return paths.isValidUserPathComponent(env);
+  return Boolean(all.find((e) => e.name.toLowerCase() == env.toLowerCase()));
 };
 
 export const env = {
