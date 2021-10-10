@@ -5,27 +5,23 @@ import { Command } from "../command";
 
 import signale from "signale";
 import chalk from "chalk";
+import { env } from "../../../core";
 
 const run = async () => {
-  const results = await readdir(envDir(), { withFileTypes: true });
+  const envs = await env.listSummary();
 
-  const mapped = results
-    .filter((dirent) => dirent.isFile())
-    .filter((dirent) => dirent.name.endsWith(".json"))
-    .map((dirent) => dirent.name.substring(0, dirent.name.length - 5));
+  const def = await env.defaultEnvironment();
 
-  const first = mapped[0];
-
-  for (const env of mapped) {
-    if (env == first) {
-      console.log(`${chalk.yellow("•")} ${env}`);
+  for (const env of envs) {
+    const name = env.name;
+    if (env.name == def) {
+      console.log(`  ${chalk.green("•")} ${chalk.green(name)}`);
     } else {
-      console.log(`  ${env}`);
+      console.log(`    ${name}`);
     }
   }
 };
 
-const envDir = () => path.join(".owl", ".env");
 
 export const EnvListCommand: Command = {
   name: "list",
