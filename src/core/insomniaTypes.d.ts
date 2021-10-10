@@ -15,5 +15,5 @@ export interface RequestDefinition {
   settingDisableRenderRequestBody: boolean;
   settingEncodeUrl: boolean;
   settingRebuildPath: boolean;
-  settingFollowRedirects: string;
+  settingFollowRedirects: "on" | "off" | "global";
 }

@@ -1,7 +1,7 @@
 {
   "url": "https://webhook.site/bb413608-6ee2-4675-ae0a-3dedffacb0fe",
   "description": "list all patients",
-  "method": "get",
+  "method": "post",
   "parameters": [
     {
       "name": "q",

@@ -1,10 +1,10 @@
-import fs from "fs";
 import { readFile } from "fs/promises";
 import { Curl } from "node-libcurl";
-import path from "path";
 import { argv } from "process";
-import tls from "tls";
+import path from "path";
+
 import { RequestDefinition } from "../core";
+import { Network } from "../core/network";
 
 export const main = async () => {
   const remaining = argv.slice(2);
@@ -21,64 +21,10 @@ export const main = async () => {
 
   const requestResult = await issueRequest(requestDefinition);
 
-  console.log("request result: ", requestResult);
+  console.log("response status: ", requestResult);
 };
 
-const issueRequest = (definition: RequestDefinition): Promise<number> => {
-  return new Promise((resolve, reject) => {
-    console.log("issuing request: ", definition);
-
-    const curl = new Curl();
-
-    curl.setOpt("URL", definition.url);
-    curl.setOpt("FOLLOWLOCATION", definition.settingFollowRedirects);
-
-    // Setup CA Root Certificates
-    // const baseCAPath = `/tmp`;
-    // const fullCAPath = pathJoin(baseCAPath, "ca-certs.pem");
-
-    // try {
-    //   fs.statSync(fullCAPath);
-    // } catch (err) {
-    //   // Doesn't exist yet, so write it
-    //   mkdirp.sync(baseCAPath);
-    //   // TODO: Should mock cacerts module for testing. This is literally
-    //   // coercing a function to string in tests due to lack of val-loader.
-    //   fs.writeFileSync(fullCAPath, String(caCerts));
-    //   console.log("[net] Set CA to", fullCAPath);
-    // }
-
-    const certFilePath = path.join(__dirname, "cert.pem");
-
-    const tlsData = tls.rootCertificates.join("\n");
-    fs.writeFileSync(certFilePath, tlsData);
-
-    curl.setOpt(Curl.option.CAINFO, certFilePath);
-
-    // curl.setOpt(Curl.option.SSL_VERIFYHOST, 0);
-    // curl.setOpt(Curl.option.SSL_VERIFYPEER, 0);
-
-    curl.on("end", function (statusCode, data, headers) {
-      console.log("END");
-      console.info(statusCode);
-      console.info("---");
-      console.info(data.length);
-      console.info("---");
-      console.info(this.getInfo("TOTAL_TIME"));
-
-      resolve(statusCode);
-
-      this.close();
-    });
-
-    curl.on("error", (a, b, c) => {
-      console.log("error", a, b);
-      curl.close.bind(curl);
-    });
-    curl.perform();
-    console.log("called curl.perform");
-  });
-};
+const issueRequest = (definition: RequestDefinition): Promise<number> => Network.performRequest(definition);
 
 const loadRequest = async (request: string): Promise<RequestDefinition> => {
   const req = `${request}.json`;
