@@ -1,4 +1,4 @@
-import { readFile, writeFile } from "fs/promises";
+import { readFile, unlink, writeFile } from "fs/promises";
 import { ok, err, Result } from "neverthrow";
 import path from "path";
 
@@ -15,7 +15,7 @@ const isValidUserPathComponent = (str: string): boolean => {
 export const paths = {
   rootDir,
   envDir: (): string => path.join(rootDir(), ".env"),
-  envPath: (name: string): string => path.join(rootDir(), ".env", `${name}.json`),
+  envPath: async (name: string): Promise<string> => path.join(rootDir(), ".env", `${name}.json`),
   envConfigPath: (): string => path.join(rootDir(), ".env", ".config"),
 
   isValidUserPathComponent,
@@ -66,7 +66,18 @@ const writeJson = async (path: string, json: any): Promise<Result<undefined, str
 };
 /* eslint-enable @typescript-eslint/explicit-module-boundary-types */
 
+const del = async (path: string): Promise<Result<undefined, string>> => {
+  try {
+    await unlink(path);
+  } catch (error) {
+    return err("" + error);
+  }
+
+  return ok(undefined);
+};
+
 export const files = {
   readJson,
   writeJson,
+  delete: del,
 };

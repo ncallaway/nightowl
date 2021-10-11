@@ -64,8 +64,8 @@ owl history show [id] # show the details for a particular request
 # environment managing
 owl env create staging
 owl env create local # create a new environment named `local`
-owl env list # list all environments
-owl env default local # set the local environment to be the saved default
+[x] owl env list # list all environments
+[x] owl env default local # set the local environment to be the saved default
 owl env use staging # use the staging environment for all subsequent calls within this shell
 owl env put local host="http://localhost:3000" token='token'
 owl env put staging host="http://staging.example.com"
@@ -74,11 +74,13 @@ owl env put local some.key='{"json":true}'
 owl env patch local '{"host": "http://localhost:3000}", "token": "token", "some": { "key": false } }'
 owl env patch local --unset some.key --unset token
 owl env rm staging
-owl env print local
+owl env rename local dev
+[x] owl env print local
 owl env print local --show-private
 
 # state
 owl state create test:1
+owl state rename test:1 test:2
 owl state use test:1
 owl state clear test:1
 owl state pathc test:1 jwt="eyJhbGciOiJIUzI1NiIs..."

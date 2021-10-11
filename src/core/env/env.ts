@@ -28,7 +28,7 @@ const setDefault = async (env: string): Promise<Result<undefined, string>> => {
 };
 
 const get = async (env: string): Promise<Result<any, string>> => {
-  const envPath = paths.envPath(env);
+  const envPath = await paths.envPath(env);
   return files.readJson(envPath);
 };
 
@@ -71,10 +71,57 @@ const exists = async (env: string): Promise<boolean> => {
   return Boolean(all.find((e) => e.name.toLowerCase() == env.toLowerCase()));
 };
 
+const create = async (env: string): Promise<Result<undefined, string>> => {
+  if (!isValidEnvironmentName(env)) {
+    return err(`the environment name was not valid: ${env}`);
+  }
+
+  if (await exists(env)) {
+    return err(`the environment already exists: ${env}`);
+  }
+
+  // is first? make default?
+  const list = await listSummary();
+  // if (resList.isErr()) {
+  //   return err(resList.error);
+  // }
+
+  const noEnviroments = list.length == 0;
+
+  const envPath = await paths.envPath(env);
+
+  const writeRes = await files.writeJson(envPath, {});
+
+  if (writeRes.isErr()) {
+    return err(writeRes.error);
+  }
+
+  if (noEnviroments) {
+    return await setDefault(env);
+  }
+
+  return ok(undefined);
+};
+
+const del = async (env: string): Promise<Result<undefined, string>> => {
+  if (!(await exists(env))) {
+    return err(`the environment does not exist: ${env}`);
+  }
+
+  const envPath = await paths.envPath(env);
+
+  // is default?
+  // is last?
+
+  return files.delete(envPath);
+};
+
 export const env = {
   listSummary,
   summaryFor,
   get,
+  create,
+  delete: del,
   setDefault,
   getDefault,
   getActive,
