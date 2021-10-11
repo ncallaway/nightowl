@@ -2,9 +2,14 @@
 
 A cli for managing a collection of http requests across a collection of environments. Designed to be useful as part of local development and integration test suites.
 
+
+
 ## CLI Design Examples
 
 ```sh
+
+# create .owl directory
+owl init
 
 # running requests
 owl patients/list # issue a patient list request

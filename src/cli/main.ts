@@ -27,6 +27,8 @@ export const main = async () => {
     const cmdArgs = commandLineArgs(mainDefinitions, { argv: args, stopAtFirstUnknown: true });
     args = cmdArgs._unknown || [];
 
+    console.log("hello world cmd args are: ", cmdArgs.cmd);
+
     const child = Commands.getChildCommand(cmd, cmdArgs.cmd);
 
     if (child) {
