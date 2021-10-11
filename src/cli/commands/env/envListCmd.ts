@@ -3,7 +3,7 @@ import { Result } from "neverthrow";
 import { env } from "../../../core";
 import { Command } from "../command";
 
-const run = async () => {
+export const outputEnvironmentList = async () => {
   const envs = await env.listSummary();
 
   const resDef: Result<string | null, string> = await env.getDefault();
@@ -21,5 +21,5 @@ const run = async () => {
 
 export const EnvListCommand: Command = {
   name: "list",
-  run,
+  run: outputEnvironmentList,
 };

@@ -28,6 +28,11 @@ const setDefault = async (env: string): Promise<Result<undefined, string>> => {
   return ok(undefined);
 };
 
+const get = async (env: string): Promise<Result<any, string>> => {
+  const envPath = paths.envPath(env);
+  return files.readJson(envPath);
+};
+
 const getDefault = async (): Promise<Result<string, string>> => {
   // get the configured default
   try {
@@ -70,6 +75,7 @@ const exists = async (env: string): Promise<boolean> => {
 export const env = {
   listSummary,
   summaryFor,
+  get,
   setDefault,
   getDefault,
   getActive,
