@@ -1,1 +1,1 @@
-export type State = object;
+export type State = any;

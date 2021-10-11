@@ -1,4 +1,3 @@
-import { readFile } from "fs/promises";
 import { err, ok, Result } from "neverthrow";
 import { files, paths } from "../lib/files";
 import { isValidEnvironmentName } from "./isValidEnvironmentName";
@@ -35,13 +34,13 @@ const get = async (env: string): Promise<Result<any, string>> => {
 
 const getDefault = async (): Promise<Result<string, string>> => {
   // get the configured default
-  try {
-    const config = await readFile(paths.envConfigPath(), "utf-8");
-    const configResult = JSON.parse(config);
-    if (configResult.default && (await exists(configResult.default))) {
-      return ok(configResult.default);
+  const resConfig = await files.readJson(paths.envConfigPath());
+  if (resConfig.isOk()) {
+    const config = resConfig.value;
+    if (config.default && (await exists(config.default))) {
+      return ok(config.default);
     }
-  } catch (err) {}
+  }
 
   // get the fallback default
   const envs = await listSummary();

@@ -1,13 +1,12 @@
-import { Curl, CurlFeature, CurlInfoDebug } from "node-libcurl";
-import tls from "tls";
 import fs from "fs";
+import { Curl, CurlFeature, CurlInfoDebug } from "node-libcurl";
 import path from "path";
+import tls from "tls";
 import { RequestDefinition } from ".";
-import cluster from "cluster";
 import { RenderedRequest } from "./insomniaTypes";
 
 const performRequest = (definition: RenderedRequest): Promise<number> => {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     console.log("issuing request: ", definition);
 
     const curl = new Curl();
@@ -60,6 +59,7 @@ const performRequest = (definition: RenderedRequest): Promise<number> => {
 
     /// TESTING Operation was aborted by an app callback
 
+    /* eslint-disable @typescript-eslint/no-unused-vars */
     curl.setOpt(Curl.option.DEBUGFUNCTION, (infoType, contentBuffer) => {
       console.log("DEBUG FUNCTION", infoType);
 
@@ -121,6 +121,7 @@ const performRequest = (definition: RenderedRequest): Promise<number> => {
       // addTimeline(name, content);
       // return 0; // Must be here
     });
+    /* eslint-enable @typescript-eslint/no-unused-vars */
 
     curl.setOpt(Curl.option.WRITEFUNCTION, (buff) => {
       // responseBodyBytes += buff.length;
@@ -132,6 +133,7 @@ const performRequest = (definition: RenderedRequest): Promise<number> => {
     // curl.setOpt(Curl.option.SSL_VERIFYHOST, 0);
     // curl.setOpt(Curl.option.SSL_VERIFYPEER, 0);
 
+    /* eslint-disable @typescript-eslint/no-unused-vars */
     curl.on("end", function (statusCode, data, headers) {
       console.log("END");
       console.info(statusCode);
@@ -149,6 +151,7 @@ const performRequest = (definition: RenderedRequest): Promise<number> => {
       console.log("ERRR", a, b);
       curl.close.bind(curl);
     });
+    /* eslint-enable @typescript-eslint/no-unused-vars */
     curl.perform();
     console.log("issued request...waiting");
   });

@@ -2,11 +2,11 @@ import { readFile, writeFile } from "fs/promises";
 import { ok, err, Result } from "neverthrow";
 import path from "path";
 
-const rootDir = () => ".owl";
+const rootDir = (): string => ".owl";
 
-const validUserPathCharsRegex = /^[^\.\\/:\*\?"<>|\cA-\cZ][^\\/:\*\?"<>|\cA-\cZ]*$/;
+const validUserPathCharsRegex = /^[^.\\/:*?"<>|\cA-\cZ][^\\/:*?"<>|\cA-\cZ]*$/;
 
-const isValidUserPathComponent = (str: string) => {
+const isValidUserPathComponent = (str: string): boolean => {
   const isTrimmed = str == str.trim();
   const isValidChars = validUserPathCharsRegex.test(str);
   return isTrimmed && isValidChars;
@@ -14,9 +14,9 @@ const isValidUserPathComponent = (str: string) => {
 
 export const paths = {
   rootDir,
-  envDir: () => path.join(rootDir(), ".env"),
-  envPath: (name: string) => path.join(rootDir(), ".env", `${name}.json`),
-  envConfigPath: () => path.join(rootDir(), ".env", ".config"),
+  envDir: (): string => path.join(rootDir(), ".env"),
+  envPath: (name: string): string => path.join(rootDir(), ".env", `${name}.json`),
+  envConfigPath: (): string => path.join(rootDir(), ".env", ".config"),
 
   isValidUserPathComponent,
 };
@@ -39,7 +39,7 @@ const readJson = async (path: string): Promise<Result<any, string>> => {
     }
 
     try {
-      let config: any = JSON.parse(content);
+      const config: any = JSON.parse(content);
       return ok(config);
     } catch (error) {
       return err("" + error);
@@ -47,6 +47,7 @@ const readJson = async (path: string): Promise<Result<any, string>> => {
   });
 };
 
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 const writeJson = async (path: string, json: any): Promise<Result<undefined, string>> => {
   let text = "";
   try {
@@ -63,6 +64,7 @@ const writeJson = async (path: string, json: any): Promise<Result<undefined, str
 
   return ok(undefined);
 };
+/* eslint-enable @typescript-eslint/explicit-module-boundary-types */
 
 export const files = {
   readJson,

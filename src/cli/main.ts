@@ -11,7 +11,7 @@ import { State } from "../core/types";
 import commandLineArgs from "command-line-args";
 import { Commands } from "./commands/command";
 
-export const main = async () => {
+export const main = async (): Promise<void> => {
   if (argv.length <= 2) {
     console.log("need at least 1 argument");
     process.exit(1);
@@ -21,7 +21,7 @@ export const main = async () => {
   /* first - parse the main command name */
 
   let cmd = Commands.RootCommand;
-  let mainDefinitions = [{ name: "cmd", defaultOption: true }];
+  const mainDefinitions = [{ name: "cmd", defaultOption: true }];
 
   while (cmd.subcommands) {
     const cmdArgs = commandLineArgs(mainDefinitions, { argv: args, stopAtFirstUnknown: true });
@@ -67,6 +67,7 @@ export const main = async () => {
   // console.log("response status: ", requestResult);
 };
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
 const issueRequest = (rendered: RenderedRequest): Promise<number> => Network.performRequest(rendered);
 
 const loadRequest = async (request: string): Promise<RequestDefinition> => {
@@ -79,7 +80,7 @@ const loadRequest = async (request: string): Promise<RequestDefinition> => {
   return requestFile;
 };
 
-type Environment = object;
+type Environment = any;
 const loadEnv = async (env: string): Promise<Environment> => {
   const envPath = path.join(".owl", ".env", `${env}.json`);
 
@@ -89,7 +90,11 @@ const loadEnv = async (env: string): Promise<Environment> => {
   return envFile;
 };
 
-const renderRequest = async (definition: RequestDefinition, env: Environment, state: {}): Promise<RenderedRequest> => {
+const renderRequest = async (
+  definition: RequestDefinition,
+  env: Environment,
+  state: State
+): Promise<RenderedRequest> => {
   const cloned: RequestDefinition = _.cloneDeep(definition);
   cloned.url = template(definition.url, env, state);
   // cloned.body = template(definition.body, env, state);
@@ -100,13 +105,14 @@ const renderRequest = async (definition: RequestDefinition, env: Environment, st
     cookieJar: {},
   };
 };
+/* eslint-enable @typescript-eslint/no-unused-vars */
 
 const template = (content: string, env: Environment, state: State): string => {
   const context = buildContext(env, state);
   return nunjucks.renderString(content, context);
 };
 
-const buildContext = (env: Environment, state: State): object => {
+const buildContext = (env: Environment, state: State): any => {
   return {
     env,
     state,

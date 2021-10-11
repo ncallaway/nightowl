@@ -3,7 +3,7 @@ import { env } from "../../../core";
 import { Command } from "../command";
 import { outputEnvironmentList } from "./envListCmd";
 
-const run = async (args: CommandLineOptions) => {
+const run = async (args: CommandLineOptions): Promise<void> => {
   if (!args.env) {
     console.log("a default environment must be provided");
     process.exit(1);

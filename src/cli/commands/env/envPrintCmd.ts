@@ -1,10 +1,8 @@
-import chalk from "chalk";
 import { CommandLineOptions } from "command-line-args";
-import { Result } from "neverthrow";
 import { env } from "../../../core";
 import { Command } from "../command";
 
-export const run = async (args: CommandLineOptions) => {
+export const run = async (args: CommandLineOptions): Promise<void> => {
   let envName = args.env;
   if (!envName) {
     envName = (await env.getDefault()).unwrapOr("");
