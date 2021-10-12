@@ -62,19 +62,19 @@ owl history patients/list # list last n patients/list request
 owl history show [id] # show the details for a particular request
 
 # environment managing
-owl env create staging
-owl env create local # create a new environment named `local`
+[x] owl env create staging
+[x] owl env create local # create a new environment named `local`
 [x] owl env list # list all environments
 [x] owl env default local # set the local environment to be the saved default
-owl env use staging # use the staging environment for all subsequent calls within this shell
-owl env put local host="http://localhost:3000" token='token'
-owl env put staging host="http://staging.example.com"
+[-] owl env use staging # use the staging environment for all subsequent calls within this shell
+[x] owl env put local host="http://localhost:3000" token='token'
+[x] owl env put staging host="http://staging.example.com"
 own env put staging --private token='my-secret-token'
-owl env put local some.key='{"json":true}'
-owl env patch local '{"host": "http://localhost:3000}", "token": "token", "some": { "key": false } }'
-owl env patch local --unset some.key --unset token
-owl env rm staging
-owl env rename local dev
+[x] owl env put local some.key='{"json":true}'
+[x] owl env patch local '{"host": "http://localhost:3000}", "token": "token", "some": { "key": false } }'
+[x] owl env patch local --unset some.key --unset token
+[x] owl env rm staging
+[x] owl env rename local dev
 [x] owl env print local
 owl env print local --show-private
 

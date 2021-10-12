@@ -1,3 +1,4 @@
+import _ from "lodash";
 import { err, ok, Result } from "neverthrow";
 import { files, paths } from "../lib/files";
 import { isValidEnvironmentName } from "./isValidEnvironmentName";
@@ -80,12 +81,8 @@ const create = async (env: string): Promise<Result<undefined, string>> => {
     return err(`the environment already exists: ${env}`);
   }
 
-  // is first? make default?
+  // is this the first env? If so we should automatically make it the default
   const list = await listSummary();
-  // if (resList.isErr()) {
-  //   return err(resList.error);
-  // }
-
   const noEnviroments = list.length == 0;
 
   const envPath = await paths.envPath(env);
@@ -116,12 +113,67 @@ const del = async (env: string): Promise<Result<undefined, string>> => {
   return files.delete(envPath);
 };
 
+const rename = async (oldEnv: string, newEnv: string): Promise<Result<undefined, string>> => {
+  if (!(await exists(oldEnv))) {
+    return err(`the environment does not exist: ${oldEnv}`);
+  }
+
+  if (await exists(newEnv)) {
+    return err(`an environment already exists: ${newEnv}`);
+  }
+
+  const resDefault = await getDefault();
+  if (resDefault.isErr()) {
+    return err(resDefault.error);
+  }
+  const wasDefault = resDefault.value == oldEnv;
+
+  const oldEnvPath = await paths.envPath(oldEnv);
+  const newEnvPath = await paths.envPath(newEnv);
+
+  const resFiles = await files.move(oldEnvPath, newEnvPath);
+  if (resFiles.isErr()) {
+    return err(resFiles.error);
+  }
+
+  if (wasDefault) {
+    return setDefault(newEnv);
+  }
+  return ok(undefined);
+};
+
+const update = async (env: string, values: any, merge = false): Promise<Result<undefined, string>> => {
+  console.log("starting update");
+  if (!(await exists(env))) {
+    return err(`the environment does not exist: ${env}`);
+  }
+
+  let base = {};
+  if (merge) {
+    const resCurrent = await get(env);
+    if (resCurrent.isErr()) {
+      return err(resCurrent.error);
+    }
+    base = resCurrent.value;
+  }
+
+  // todo: .assign doesn't do a deep merge the way we will probably want it to,
+  // but .merge doesn't handle `undefined` values the way we want it to. This will
+  // probably need to be replaced with a custom implementation.
+  const updated = _.assign({}, base, values);
+
+  const envPath = await paths.envPath(env);
+  return files.writeJson(envPath, updated);
+};
+
 export const env = {
   listSummary,
   summaryFor,
   get,
   create,
+  update,
   delete: del,
+  rename,
   setDefault,
   getDefault,
   getActive,

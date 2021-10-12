@@ -1,4 +1,4 @@
-import { readFile, unlink, writeFile } from "fs/promises";
+import { readFile, rename, unlink, writeFile } from "fs/promises";
 import { ok, err, Result } from "neverthrow";
 import path from "path";
 
@@ -76,8 +76,19 @@ const del = async (path: string): Promise<Result<undefined, string>> => {
   return ok(undefined);
 };
 
+const move = async (oldPath: string, newPath: string): Promise<Result<undefined, string>> => {
+  try {
+    await rename(oldPath, newPath);
+  } catch (error) {
+    return err("" + error);
+  }
+
+  return ok(undefined);
+};
+
 export const files = {
   readJson,
   writeJson,
   delete: del,
+  move,
 };

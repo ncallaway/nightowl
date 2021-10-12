@@ -41,7 +41,7 @@ export const main = async (): Promise<void> => {
   if (cmd.run) {
     let cmdArgs = {};
     if (cmd.options) {
-      cmdArgs = commandLineArgs(cmd.options, { argv: args });
+      cmdArgs = commandLineArgs(cmd.options, { argv: args, stopAtFirstUnknown: true });
     }
     cmd.run(cmdArgs);
   } else {
