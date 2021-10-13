@@ -1,13 +1,10 @@
 import { env } from "../../../src/core";
 import { readdir } from "fs/promises";
 import { Dirent } from "fs";
-import { EnvironmentSummary } from "../../../src/core/env/listSummary";
+import { EnvironmentSummary } from "../../../src/core/env/envListSummary";
+import { mockedFn } from "../../util";
 
 jest.mock("fs/promises");
-
-const mockedFn = <T extends (...args: any[]) => any>(thing: T): jest.MockedFunction<T> => {
-  return thing as unknown as jest.MockedFunction<T>;
-};
 
 const stubFile = {
   isFile: () => true,

@@ -1,7 +1,7 @@
 import { env } from "../../../src/core";
-import { listSummary, EnvironmentSummary } from "../../../src/core/env/listSummary";
+import { listSummary, EnvironmentSummary } from "../../../src/core/env/envListSummary";
 
-jest.mock("../../../src/core/env/listSummary");
+jest.mock("../../../src/core/env/envListSummary");
 
 const mockedFn = <T extends (...args: any[]) => any>(thing: T): jest.MockedFunction<T> => {
   return thing as unknown as jest.MockedFunction<T>;
@@ -27,5 +27,9 @@ describe("env", () => {
       await expect(env.exists(".dev")).resolves.toEqual(false);
       expect(mockList.mock.calls.length).toEqual(0);
     });
+  });
+
+  describe("get", () => {
+    it("should return the contents of the files if they exist", () => {});
   });
 });

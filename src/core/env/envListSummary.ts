@@ -1,6 +1,6 @@
 import { readdir } from "fs/promises";
-import { paths } from "../lib/files";
-import { isValidEnvironmentName } from "./isValidEnvironmentName";
+import { paths } from "../lib/paths";
+import { isValidEnvironmentName } from "./envIsValidEnvironmentName";
 
 export type EnvironmentSummary = {
   name: string;

@@ -1,25 +1,5 @@
-import { readFile, rename, unlink, writeFile } from "fs/promises";
+import { rename, unlink, writeFile, readFile } from "fs/promises";
 import { ok, err, Result } from "neverthrow";
-import path from "path";
-
-const rootDir = (): string => ".owl";
-
-const validUserPathCharsRegex = /^[^.\\/:*?"<>|\cA-\cZ][^\\/:*?"<>|\cA-\cZ]*$/;
-
-const isValidUserPathComponent = (str: string): boolean => {
-  const isTrimmed = str == str.trim();
-  const isValidChars = validUserPathCharsRegex.test(str);
-  return isTrimmed && isValidChars;
-};
-
-export const paths = {
-  rootDir,
-  envDir: (): string => path.join(rootDir(), ".env"),
-  envPath: async (name: string): Promise<string> => path.join(rootDir(), ".env", `${name}.json`),
-  envConfigPath: (): string => path.join(rootDir(), ".env", ".config"),
-
-  isValidUserPathComponent,
-};
 
 const readTextFile = async (path: string): Promise<Result<string, string>> => {
   try {
@@ -29,7 +9,6 @@ const readTextFile = async (path: string): Promise<Result<string, string>> => {
     return err("" + error);
   }
 };
-
 const readJson = async (path: string): Promise<Result<any, string>> => {
   const resRawFile = await readTextFile(path);
 

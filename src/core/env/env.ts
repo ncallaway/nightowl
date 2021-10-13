@@ -1,8 +1,10 @@
 import _ from "lodash";
 import { err, ok, Result } from "neverthrow";
-import { files, paths } from "../lib/files";
-import { isValidEnvironmentName } from "./isValidEnvironmentName";
-import { listSummary, summaryFor } from "./listSummary";
+import { files } from "../lib/files";
+import { paths } from "../lib/paths";
+import { isValidEnvironmentName } from "./envIsValidEnvironmentName";
+import { listSummary, summaryFor } from "./envListSummary";
+import { get } from "./envGet";
 
 const setDefault = async (env: string): Promise<Result<undefined, string>> => {
   if (!(await exists(env))) {
@@ -26,11 +28,6 @@ const setDefault = async (env: string): Promise<Result<undefined, string>> => {
   }
 
   return ok(undefined);
-};
-
-const get = async (env: string): Promise<Result<any, string>> => {
-  const envPath = await paths.envPath(env);
-  return files.readJson(envPath);
 };
 
 const getDefault = async (): Promise<Result<string, string>> => {
