@@ -139,7 +139,7 @@ const rename = async (oldEnv: string, newEnv: string): Promise<Result<undefined,
   return ok(undefined);
 };
 
-const update = async (env: string, values: any, merge = false): Promise<Result<undefined, string>> => {
+const update = async (env: string, values: unknown, merge = false): Promise<Result<undefined, string>> => {
   console.log("starting update");
   if (!(await exists(env))) {
     return err(`the environment does not exist: ${env}`);
