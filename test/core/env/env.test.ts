@@ -1,11 +1,8 @@
 import { env } from "../../../src/core";
 import { listSummary, EnvironmentSummary } from "../../../src/core/env/envListSummary";
+import { mockedFn } from "../../util";
 
 jest.mock("../../../src/core/env/envListSummary");
-
-const mockedFn = <T extends (...args: any[]) => any>(thing: T): jest.MockedFunction<T> => {
-  return thing as unknown as jest.MockedFunction<T>;
-};
 
 describe("env", () => {
   describe("exists", () => {
@@ -29,7 +26,44 @@ describe("env", () => {
     });
   });
 
-  describe("get", () => {
-    it("should return the contents of the files if they exist", () => {});
+  describe("active", () => {
+    it("should return the OWL_ENV value if it exists", async () => {
+      const stubEnvironments: EnvironmentSummary[] = [{ name: "dev" }, { name: "staging" }];
+      mockedFn(listSummary).mockImplementation(() => Promise.resolve(stubEnvironments));
+      process.env.OWL_ENV = "staging";
+
+      const active = (await env.getActive())._unsafeUnwrap();
+
+      expect(active).toEqual("staging");
+    });
+
+    it("should return the default value if OWL_ENV value doesn't exist", async () => {
+      const stubEnvironments: EnvironmentSummary[] = [{ name: "dev" }, { name: "staging" }];
+      mockedFn(listSummary).mockImplementation(() => Promise.resolve(stubEnvironments));
+      process.env.OWL_ENV = "foobar";
+
+      const active = (await env.getActive())._unsafeUnwrap();
+
+      expect(active).toEqual("dev");
+    });
+
+    it("should return the default value if OWL_ENV isn't set", async () => {
+      const stubEnvironments: EnvironmentSummary[] = [{ name: "dev" }, { name: "staging" }];
+      mockedFn(listSummary).mockImplementation(() => Promise.resolve(stubEnvironments));
+      process.env.OWL_ENV = undefined;
+
+      const active = (await env.getActive())._unsafeUnwrap();
+
+      expect(active).toEqual("dev");
+    });
+
+    it("should return an error if there are no environments", async () => {
+      const stubEnvironments: EnvironmentSummary[] = [];
+      mockedFn(listSummary).mockImplementation(() => Promise.resolve(stubEnvironments));
+
+      const res = await env.getActive();
+
+      expect(res.isErr()).toEqual(true);
+    });
   });
 });
