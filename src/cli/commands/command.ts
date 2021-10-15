@@ -20,9 +20,10 @@ const RootCommand: Command = {
     default: RequestCommand,
     commands: [RequestCommand, EnvCommand],
   },
+  options: [{ name: "cmd", defaultOption: true }],
 };
 
-const getChildCommand = (command: Command, str: string): Command | null => {
+const getExplicitChildCommand = (command: Command, str: string): Command | null => {
   if (!command.subcommands) {
     return null;
   }
@@ -31,10 +32,21 @@ const getChildCommand = (command: Command, str: string): Command | null => {
   if (subCmdNames.includes(str)) {
     return command.subcommands.commands.find((cmd) => cmd.name == str) || null;
   }
-  return command.subcommands.default;
+  return null;
+};
+
+const getChildCommand = (command: Command, str: string): Command | null => {
+  const explicit = getExplicitChildCommand(command, str);
+
+  if (explicit) {
+    return explicit;
+  }
+
+  return command.subcommands?.default || null;
 };
 
 export const Commands = {
   getChildCommand,
+  getExplicitChildCommand,
   RootCommand,
 };

@@ -6,6 +6,8 @@ import { isValidEnvironmentName } from "./envIsValidEnvironmentName";
 import { listSummary, summaryFor } from "./envListSummary";
 import { get } from "./envGet";
 
+export type Environment = any;
+
 const setDefault = async (env: string): Promise<Result<undefined, string>> => {
   if (!(await exists(env))) {
     // write to config...

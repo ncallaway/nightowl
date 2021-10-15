@@ -27,7 +27,15 @@ export const main = async (): Promise<void> => {
     const cmdArgs = commandLineArgs(mainDefinitions, { argv: args, stopAtFirstUnknown: true });
     args = cmdArgs._unknown || [];
 
-    const child = Commands.getChildCommand(cmd, cmdArgs.cmd);
+    let child = Commands.getExplicitChildCommand(cmd, cmdArgs.cmd);
+    if (!child) {
+      // if the cmd arg wasn't recognized as an explicit cmd, push it back into the remaining args,
+      // list in case it's an argument for something else. Then try and get the default command
+      if (cmdArgs.cmd) {
+        args.unshift(cmdArgs.cmd);
+      }
+      child = Commands.getChildCommand(cmd, cmdArgs.cmd);
+    }
 
     if (child) {
       cmd = child;
@@ -47,74 +55,6 @@ export const main = async (): Promise<void> => {
   } else {
     console.log("(no-run for cmd) ", cmd);
   }
-
-  // const remaining = argv.slice(2);
-  // if (remaining.length == 0) {
-  //   console.log("usage instructions?");
-  //   process.exit(1);
-  // }
-  // const requestKey = remaining.shift() as string;
-  // console.log("request is: ", requestKey);
-  // const requestDefinition = await loadRequest(requestKey);
-  // let envStr = "local";
-  // if (remaining.length) {
-  //   envStr = remaining.shift() as string;
-  // }
-  // const env = await loadEnv(envStr);
-  // const state: State = {};
-  // const renderedRequest = await renderRequest(requestDefinition, env, state);
-  // const requestResult = await issueRequest(renderedRequest);
-  // console.log("response status: ", requestResult);
 };
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-const issueRequest = (rendered: RenderedRequest): Promise<number> => Network.performRequest(rendered);
 
-const loadRequest = async (request: string): Promise<RequestDefinition> => {
-  const req = `${request}.json`;
-  const requestPath = path.join(".owl", req);
-
-  const requestContent = await readFile(requestPath, "utf-8");
-  const requestFile = JSON.parse(requestContent) as RequestDefinition;
-
-  return requestFile;
-};
-
-type Environment = any;
-const loadEnv = async (env: string): Promise<Environment> => {
-  const envPath = path.join(".owl", ".env", `${env}.json`);
-
-  const envContent = await readFile(envPath, "utf-8");
-  const envFile = JSON.parse(envContent) || ({} as Environment);
-
-  return envFile;
-};
-
-const renderRequest = async (
-  definition: RequestDefinition,
-  env: Environment,
-  state: State
-): Promise<RenderedRequest> => {
-  const cloned: RequestDefinition = _.cloneDeep(definition);
-  cloned.url = template(definition.url, env, state);
-  // cloned.body = template(definition.body, env, state);
-
-  return {
-    ...cloned,
-    cookies: [],
-    cookieJar: {},
-  };
-};
-/* eslint-enable @typescript-eslint/no-unused-vars */
-
-const template = (content: string, env: Environment, state: State): string => {
-  const context = buildContext(env, state);
-  return nunjucks.renderString(content, context);
-};
-
-const buildContext = (env: Environment, state: State): any => {
-  return {
-    env,
-    state,
-  };
-};
