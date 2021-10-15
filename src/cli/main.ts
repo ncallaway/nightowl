@@ -1,14 +1,5 @@
-import { readFile } from "fs/promises";
-import _ from "lodash";
-import nunjucks from "nunjucks";
-import path from "path";
-import { argv } from "process";
-import { RequestDefinition } from "../core";
-import { RenderedRequest } from "../core/insomniaTypes";
-import { Network } from "../core/network";
-import { State } from "../core/types";
-
 import commandLineArgs from "command-line-args";
+import { argv } from "process";
 import { Commands } from "./commands/command";
 
 export const main = async (): Promise<void> => {
@@ -56,5 +47,3 @@ export const main = async (): Promise<void> => {
     console.log("(no-run for cmd) ", cmd);
   }
 };
-
-

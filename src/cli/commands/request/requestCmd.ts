@@ -1,19 +1,17 @@
+import { CommandLineOptions } from "command-line-args";
 import { readFile } from "fs/promises";
 import _ from "lodash";
 import nunjucks from "nunjucks";
 import path from "path";
-import { argv } from "process";
+import { env, Environment, RequestDefinition } from "../../../core";
+import { RenderedRequest } from "../../../core/insomniaTypes";
+import { Network } from "../../../core/network";
+import { State } from "../../../core/types";
 // import { RequestDefinition } from "../core";
 // import { RenderedRequest } from "../core/insomniaTypes";
 // import { Network } from "../core/network";
 // import { State } from "../core/types";
 import { Command } from "../command";
-import { CommandLineOptions } from "command-line-args";
-import { RenderedRequest } from "../../../core/insomniaTypes";
-import { env, Environment, RequestDefinition } from "../../../core";
-import { Network } from "../../../core/network";
-import { State } from "../../../core/types";
-import { err } from "neverthrow";
 
 const run = async (args: CommandLineOptions): Promise<void> => {
   if (!args.request) {
