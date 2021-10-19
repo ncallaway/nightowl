@@ -1,6 +1,5 @@
 import _ from "lodash";
-import { ok, err, Result } from "neverthrow";
-import { render } from "nunjucks";
+import { err, ok, Result } from "neverthrow";
 import { RenderedEnvironment } from "..";
 import { files } from "../lib/files";
 import { paths } from "../lib/paths";

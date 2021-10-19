@@ -1,9 +1,11 @@
+import chalk from "chalk";
 import { CommandLineOptions } from "command-line-args";
 import { readFile } from "fs/promises";
 import _ from "lodash";
 import nunjucks from "nunjucks";
 import path from "path";
-import { env, SavedEnvironment, RequestDefinition, RenderedEnvironment } from "../../../core";
+import prompts from "prompts";
+import { env, RenderedEnvironment, RequestDefinition } from "../../../core";
 import { RenderedRequest } from "../../../core/insomniaTypes";
 import { Network } from "../../../core/network";
 import { State } from "../../../core/types";
@@ -12,8 +14,6 @@ import { State } from "../../../core/types";
 // import { Network } from "../core/network";
 // import { State } from "../core/types";
 import { Command } from "../command";
-import prompts from "prompts";
-import chalk from "chalk";
 
 const run = async (args: CommandLineOptions): Promise<void> => {
   if (!args.request) {
