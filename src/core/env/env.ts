@@ -6,7 +6,35 @@ import { isValidEnvironmentName } from "./envIsValidEnvironmentName";
 import { listSummary, summaryFor } from "./envListSummary";
 import { get } from "./envGet";
 
-export type Environment = any;
+
+export type RenderedEnvironment = unknown;
+type PrivateDefinition = {
+  key: string;
+  description: string;
+};
+export type SavedEnvironment = {
+  values: unknown;
+  private: PrivateDefinition[];
+};
+
+export type EnvironmentPrompt = {
+  key: string;
+  description: string;
+};
+
+const getPrompts = async (env: string): Promise<Result<EnvironmentPrompt[], string>> => {
+  const envPath = await paths.envPath(env);
+
+  const resEnvRaw = await files.readJson(envPath);
+  if (resEnvRaw.isErr()) {
+    return err(resEnvRaw.error);
+  }
+  const envRaw = resEnvRaw.value as any;
+
+  const privates = envRaw.private || [];
+
+  return ok(privates);
+};
 
 const setDefault = async (env: string): Promise<Result<undefined, string>> => {
   if (!(await exists(env))) {
@@ -21,7 +49,7 @@ const setDefault = async (env: string): Promise<Result<undefined, string>> => {
     return err(resJson.error);
   }
 
-  const config = resJson.value;
+  const config = resJson.value as any;
   config.default = env;
 
   const resWrite = await files.writeJson(paths.envConfigPath(), config);
@@ -36,7 +64,7 @@ const getDefault = async (): Promise<Result<string, string>> => {
   // get the configured default
   const resConfig = await files.readJson(paths.envConfigPath());
   if (resConfig.isOk()) {
-    const config = resConfig.value;
+    const config = resConfig.value as any;
     if (config.default && (await exists(config.default))) {
       return ok(config.default);
     }
@@ -69,34 +97,6 @@ const exists = async (env: string): Promise<boolean> => {
   const all = await listSummary();
 
   return Boolean(all.find((e) => e.name.toLowerCase() == env.toLowerCase()));
-};
-
-const create = async (env: string): Promise<Result<undefined, string>> => {
-  if (!isValidEnvironmentName(env)) {
-    return err(`the environment name was not valid: ${env}`);
-  }
-
-  if (await exists(env)) {
-    return err(`the environment already exists: ${env}`);
-  }
-
-  // is this the first env? If so we should automatically make it the default
-  const list = await listSummary();
-  const noEnviroments = list.length == 0;
-
-  const envPath = await paths.envPath(env);
-
-  const writeRes = await files.writeJson(envPath, {});
-
-  if (writeRes.isErr()) {
-    return err(writeRes.error);
-  }
-
-  if (noEnviroments) {
-    return await setDefault(env);
-  }
-
-  return ok(undefined);
 };
 
 const del = async (env: string): Promise<Result<undefined, string>> => {
@@ -141,6 +141,34 @@ const rename = async (oldEnv: string, newEnv: string): Promise<Result<undefined,
   return ok(undefined);
 };
 
+const create = async (env: string): Promise<Result<undefined, string>> => {
+  if (!isValidEnvironmentName(env)) {
+    return err(`the environment name was not valid: ${env}`);
+  }
+
+  if (await exists(env)) {
+    return err(`the environment already exists: ${env}`);
+  }
+
+  // is this the first env? If so we should automatically make it the default
+  const list = await listSummary();
+  const noEnviroments = list.length == 0;
+
+  const envPath = await paths.envPath(env);
+
+  const writeRes = await files.writeJson(envPath, {});
+
+  if (writeRes.isErr()) {
+    return err(writeRes.error);
+  }
+
+  if (noEnviroments) {
+    return await setDefault(env);
+  }
+
+  return ok(undefined);
+};
+
 const update = async (env: string, values: unknown, merge = false): Promise<Result<undefined, string>> => {
   if (!(await exists(env))) {
     return err(`the environment does not exist: ${env}`);
@@ -152,7 +180,7 @@ const update = async (env: string, values: unknown, merge = false): Promise<Resu
     if (resCurrent.isErr()) {
       return err(resCurrent.error);
     }
-    base = resCurrent.value;
+    base = resCurrent.value as any;
   }
 
   // todo: .assign doesn't do a deep merge the way we will probably want it to,
@@ -167,6 +195,7 @@ const update = async (env: string, values: unknown, merge = false): Promise<Resu
 export const env = {
   listSummary,
   summaryFor,
+  getPrompts,
   get,
   create,
   update,

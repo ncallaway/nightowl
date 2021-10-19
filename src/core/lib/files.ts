@@ -9,7 +9,7 @@ const readTextFile = async (path: string): Promise<Result<string, string>> => {
     return err("" + error);
   }
 };
-const readJson = async (path: string): Promise<Result<any, string>> => {
+const readJson = async (path: string): Promise<Result<unknown, string>> => {
   const resRawFile = await readTextFile(path);
 
   return resRawFile.andThen((content) => {

@@ -3,7 +3,7 @@ import { readFile } from "fs/promises";
 import _ from "lodash";
 import nunjucks from "nunjucks";
 import path from "path";
-import { env, Environment, RequestDefinition } from "../../../core";
+import { env, SavedEnvironment, RequestDefinition, RenderedEnvironment } from "../../../core";
 import { RenderedRequest } from "../../../core/insomniaTypes";
 import { Network } from "../../../core/network";
 import { State } from "../../../core/types";
@@ -12,6 +12,8 @@ import { State } from "../../../core/types";
 // import { Network } from "../core/network";
 // import { State } from "../core/types";
 import { Command } from "../command";
+import prompts from "prompts";
+import chalk from "chalk";
 
 const run = async (args: CommandLineOptions): Promise<void> => {
   if (!args.request) {
@@ -29,15 +31,45 @@ const run = async (args: CommandLineOptions): Promise<void> => {
     }
     envStr = resEnvStr.value;
   }
-  const resLoadedEnv = await env.get(envStr);
+  // get and issue environment prompts
+  const resEnvPrompts = await env.getPrompts(envStr);
+  if (resEnvPrompts.isErr()) {
+    console.error(`\nFailed to send request (error loading environment: ${resEnvPrompts.error})`);
+    process.exit(1);
+  }
+  const envPrompts = resEnvPrompts.value;
+  console.log("res env prompts", envPrompts);
 
+  const envPrivates = {};
+
+  // prompt and private
+
+  for (const envPrompt of envPrompts) {
+    const response = await prompts({
+      type: "password",
+      name: "val",
+      message: `${envPrompt.description} (${chalk.dim(envPrompt.key)})`,
+      validate: (value) => (Boolean(value) ? true : `Cannot be empty`),
+    });
+
+    console.log(response.val); // => { value: 24 }
+
+    const op = _.set({}, envPrompt.key, response.val);
+    _.merge(envPrivates, op);
+  }
+
+  console.log("SUPER SECRET DATA: ", envPrivates);
+
+  const resLoadedEnv = await env.get(envStr, envPrivates);
   if (resLoadedEnv.isErr()) {
     console.error(`\nFailed to send request (error loading environment: ${resLoadedEnv.error})`);
     process.exit(1);
   }
   const loadedEnv = resLoadedEnv.value;
 
-  // const env = await loadEnv(envStr);
+  console.log("LOADED ENV WITH SECRETS: ", loadedEnv);
+
+  // // const env = await loadEnv(envStr);
   const state: State = {};
   const renderedRequest = await renderRequest(requestDefinition, loadedEnv, state);
   const requestResult = await issueRequest(renderedRequest);
@@ -67,7 +99,7 @@ const loadRequest = async (request: string): Promise<RequestDefinition> => {
 
 const renderRequest = async (
   definition: RequestDefinition,
-  env: Environment,
+  env: RenderedEnvironment,
   state: State
 ): Promise<RenderedRequest> => {
   const cloned: RequestDefinition = _.cloneDeep(definition);
@@ -81,12 +113,12 @@ const renderRequest = async (
   };
 };
 
-const template = (content: string, env: Environment, state: State): string => {
+const template = (content: string, env: RenderedEnvironment, state: State): string => {
   const context = buildContext(env, state);
   return nunjucks.renderString(content, context);
 };
 
-const buildContext = (env: Environment, state: State): any => {
+const buildContext = (env: RenderedEnvironment, state: State): any => {
   return {
     env,
     state,
