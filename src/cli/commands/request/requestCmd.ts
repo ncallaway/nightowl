@@ -52,6 +52,10 @@ const run = async (args: CommandLineOptions): Promise<void> => {
       validate: (value) => (Boolean(value) ? true : `Cannot be empty`),
     });
 
+    if (response.val === undefined) {
+      process.exit(0);
+    }
+
     console.log(response.val); // => { value: 24 }
 
     const op = _.set({}, envPrompt.key, response.val);

@@ -3,9 +3,10 @@ import { err, ok, Result } from "neverthrow";
 import { RenderedEnvironment } from "..";
 import { files } from "../lib/files";
 import { paths } from "../lib/paths";
+import { userstore } from "../lib/userstore";
 import { SavedEnvironment } from "./env";
 
-export const get = async (env: string, privates: any = {}): Promise<Result<RenderedEnvironment, string>> => {
+export const get = async (env: string, prompts: any = {}): Promise<Result<RenderedEnvironment, string>> => {
   const envPath = await paths.envPath(env);
 
   const resEnvRaw = await files.readJson(envPath);
@@ -19,17 +20,22 @@ export const get = async (env: string, privates: any = {}): Promise<Result<Rende
     private: envRaw.private || [],
   };
 
+  // fetch privates
+  const savedPrivateValues = await userstore.getEnvPrivateValues(env);
+
   // todo: render the environment
   const renderedPrivates = {};
   for (const privateDesc of savedEnv.private) {
     if (privateDesc.key) {
-      const val = _.get(privates, privateDesc.key) || "<unset-private-value>";
+      const val = _.get(prompts, privateDesc.key) || _.get(savedPrivateValues, privateDesc.key) || undefined;
       // if (!val) {
       //   return e / rr(`No value was set for private environment value: ${privateDesc.key}`);
       // }
       _.set(renderedPrivates, privateDesc.key, val);
     }
   }
+
+  await userstore.saveEnvPrivateValues(env, renderedPrivates);
 
   const renderedEnv: RenderedEnvironment = _.assign({}, savedEnv.values, renderedPrivates);
   console.log("RENDERED: ", renderedEnv);

@@ -5,7 +5,7 @@ import { paths } from "../lib/paths";
 import { isValidEnvironmentName } from "./envIsValidEnvironmentName";
 import { listSummary, summaryFor } from "./envListSummary";
 import { get } from "./envGet";
-
+import { userstore } from "../lib/userstore";
 
 export type RenderedEnvironment = unknown;
 type PrivateDefinition = {
@@ -33,7 +33,11 @@ const getPrompts = async (env: string): Promise<Result<EnvironmentPrompt[], stri
 
   const privates = envRaw.private || [];
 
-  return ok(privates);
+  const savedPrivateValues = await userstore.getEnvPrivateValues(env);
+
+  const unsavedPrivates = privates.filter((p: any) => !Boolean(_.get(savedPrivateValues, p.key)));
+
+  return ok(unsavedPrivates);
 };
 
 const setDefault = async (env: string): Promise<Result<undefined, string>> => {
