@@ -1,19 +1,11 @@
 {
   "values": {
-    "host": "https://webhook.site/bb413608-6ee2-4675-ae0a-3dedffacb0fe"
+    "host": "https://webhook.site/d5ee6954-fee6-49ca-b22e-4ad3ea170aec"
   },
   "private": [
     {
       "key": "token",
-      "description": "API Token"
-    },
-    {
-      "key": "foo.bar",
-      "description": "A Value"
-    },
-    {
-      "key": "foo.fizz",
-      "description": "Another Value"
+      "description": ""
     }
   ]
 }
