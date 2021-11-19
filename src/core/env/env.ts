@@ -189,12 +189,14 @@ const update = async (env: string, values: any, privates: any, merge = false): P
   };
 
   if (merge) {
-    const resCurrent = await get(env);
-    if (resCurrent.isErr()) {
-      return err(resCurrent.error);
+    const envPath = await paths.envPath(env);
+    const resEnvRaw = await files.readJson(envPath);
+    if (resEnvRaw.isErr()) {
+      return err(resEnvRaw.error);
     }
-    base = resCurrent.value as SavedEnvironment;
+    base = resEnvRaw.value as SavedEnvironment;
     privateDefinitions = base.private;
+    console.log("got base: ", base);
     savedPrivateValues = await userstore.getEnvPrivateValues(env);
   }
 
@@ -212,11 +214,17 @@ const update = async (env: string, values: any, privates: any, merge = false): P
       description: "",
     };
   });
-  privateDefinitions = privateDefinitions.concat(newPrivateDefinitions);
+
+  const allPrivateDefinitions: EnvironmentPrivateDefinition[] = [...privateDefinitions];
+  for (const def of newPrivateDefinitions) {
+    if (!allPrivateDefinitions.find((d) => d.key == def.key)) {
+      allPrivateDefinitions.push(def);
+    }
+  }
 
   const updated: SavedEnvironment = {
     values: updatedValues,
-    private: privateDefinitions,
+    private: allPrivateDefinitions,
   };
 
   await userstore.saveEnvPrivateValues(env, savedPrivateValues);

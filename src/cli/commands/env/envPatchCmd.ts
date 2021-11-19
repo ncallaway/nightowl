@@ -23,7 +23,7 @@ export const EnvPatchCommand: Command = {
   options: [
     { name: "env", defaultOption: true },
     { name: "unset", alias: "u", multiple: true },
-    { name: "private", alias: "p", multiple: true },
+    { name: "private", alias: "p", lazyMultiple: true },
   ],
   run,
 };
