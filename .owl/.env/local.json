@@ -5,15 +5,15 @@
   "private": [
     {
       "key": "token",
-      "description": "API Token"
+      "description": ""
     },
     {
       "key": "foo.bar",
-      "description": "A Value"
+      "description": ""
     },
     {
       "key": "foo.fizz",
-      "description": "Another Value"
+      "description": ""
     }
   ]
 }

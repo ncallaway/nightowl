@@ -6,15 +6,16 @@ import { isValidEnvironmentName } from "./envIsValidEnvironmentName";
 import { listSummary, summaryFor } from "./envListSummary";
 import { get } from "./envGet";
 import { userstore } from "../lib/userstore";
+import { envPrivates } from "../lib/envPrivates";
 
-export type RenderedEnvironment = unknown;
-type PrivateDefinition = {
+export type RenderedEnvironment = Record<string, unknown>;
+export type EnvironmentPrivateDefinition = {
   key: string;
   description: string;
 };
 export type SavedEnvironment = {
-  values: unknown;
-  private: PrivateDefinition[];
+  values: Record<string, unknown>;
+  private: EnvironmentPrivateDefinition[];
 };
 
 export type EnvironmentPrompt = {
@@ -173,27 +174,55 @@ const create = async (env: string): Promise<Result<undefined, string>> => {
   return ok(undefined);
 };
 
-const update = async (env: string, values: unknown, merge = false): Promise<Result<undefined, string>> => {
+const update = async (env: string, values: any, privates: any, merge = false): Promise<Result<undefined, string>> => {
   if (!(await exists(env))) {
     return err(`the environment does not exist: ${env}`);
   }
 
-  let base = {};
+  // let baseValues = {};
+  // let basePrivates: SerializedEnvironmentPrivate = [];
+  let privateDefinitions: EnvironmentPrivateDefinition[] = [];
+  let savedPrivateValues = {};
+  let base: SavedEnvironment = {
+    values: {},
+    private: [],
+  };
+
   if (merge) {
     const resCurrent = await get(env);
     if (resCurrent.isErr()) {
       return err(resCurrent.error);
     }
-    base = resCurrent.value as any;
+    base = resCurrent.value as SavedEnvironment;
+    privateDefinitions = base.private;
+    savedPrivateValues = await userstore.getEnvPrivateValues(env);
   }
 
   // todo: .assign doesn't do a deep merge the way we will probably want it to,
   // but .merge doesn't handle `undefined` values the way we want it to. This will
   // probably need to be replaced with a custom implementation.
-  const updated = _.assign({}, base, values);
+  const updatedValues = _.assign({}, base.values, values);
+  savedPrivateValues = _.assign({}, savedPrivateValues, privates);
+
+  // calculate the new private keys
+  const newPrivateKeys = envPrivates.allKeysForPrivates(privates);
+  const newPrivateDefinitions: EnvironmentPrivateDefinition[] = newPrivateKeys.map((k) => {
+    return {
+      key: k,
+      description: "",
+    };
+  });
+  privateDefinitions = privateDefinitions.concat(newPrivateDefinitions);
+
+  const updated: SavedEnvironment = {
+    values: updatedValues,
+    private: privateDefinitions,
+  };
+
+  await userstore.saveEnvPrivateValues(env, savedPrivateValues);
 
   const envPath = await paths.envPath(env);
-  return files.writeJson(envPath, updated);
+  return files.writeJson(envPath, updated, { pretty: true });
 };
 
 export const env = {
