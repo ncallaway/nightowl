@@ -99,6 +99,10 @@ const renderRequest = async (
   cloned.url = template(definition.url, env, state);
   // cloned.body = template(definition.body, env, state);
 
+  if (cloned.body.text) {
+    cloned.body.text = template(cloned.body.text, env, state);
+  }
+
   return {
     ...cloned,
     cookies: [],

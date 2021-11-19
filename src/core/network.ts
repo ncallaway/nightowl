@@ -1,13 +1,16 @@
 import fs from "fs";
+import _ from "lodash";
 import { Curl, CurlFeature, CurlInfoDebug } from "node-libcurl";
 import path from "path";
 import tls from "tls";
 import { RequestDefinition } from ".";
 import { RenderedRequest } from "./insomniaTypes";
 
+// adapted from: export async function _actuallySend (https://github.com/Kong/insomnia/blob/83477364c68dea794274929d499658885143729c/packages/insomnia-app/app/network/network.ts#L137)
 const performRequest = (definition: RenderedRequest): Promise<number> => {
   return new Promise((resolve) => {
     console.log("issuing request: ", definition);
+    const headers = _.clone(definition.headers);
 
     const curl = new Curl();
 
@@ -65,16 +68,16 @@ const performRequest = (definition: RenderedRequest): Promise<number> => {
 
       switch (infoType) {
         case CurlInfoDebug.DataIn:
-          console.log("DATA IN");
+          console.log("DATA IN", contentBuffer.toString("utf-8"));
           return 0;
         case CurlInfoDebug.DataOut:
-          console.log("DATA OUT");
+          console.log("DATA OUT", contentBuffer.toString("utf-8"));
           return 0;
         case CurlInfoDebug.HeaderIn:
-          console.log("HEADER IN");
+          console.log("HEADER IN: ", contentBuffer.toString("utf-8"));
           return 0;
         case CurlInfoDebug.HeaderOut:
-          console.log("HEADER OUT");
+          console.log("HEADER OUT", contentBuffer.toString("utf-8"));
           return 0;
         case CurlInfoDebug.SslDataIn:
           console.log("SSL DATA IN");
@@ -130,6 +133,10 @@ const performRequest = (definition: RenderedRequest): Promise<number> => {
       return buff.length;
     });
 
+    if (definition.body?.text) {
+      curl.setOpt(Curl.option.POSTFIELDS, definition.body.text);
+    }
+
     // curl.setOpt(Curl.option.SSL_VERIFYHOST, 0);
     // curl.setOpt(Curl.option.SSL_VERIFYPEER, 0);
 
@@ -151,6 +158,26 @@ const performRequest = (definition: RenderedRequest): Promise<number> => {
       console.log("ERRR", a, b);
       curl.close.bind(curl);
     });
+
+    const headerStrings = headers
+      .filter((h) => h.name)
+      .map((h) => {
+        const value = h.value || "";
+
+        if (value === "") {
+          // Curl needs a semicolon suffix to send empty header values
+          return `${h.name};`;
+          // } else if (value === DISABLE_HEADER_VALUE) {
+          //   // Tell Curl NOT to send the header if value is null
+          //   return `${h.name}:`;
+        } else {
+          // Send normal header value
+          return `${h.name}: ${value}`;
+        }
+      });
+    console.log("header strings: ", headerStrings);
+    curl.setOpt(Curl.option.HTTPHEADER, headerStrings);
+
     /* eslint-enable @typescript-eslint/no-unused-vars */
     curl.perform();
     console.log("issued request...waiting");
