@@ -4,7 +4,7 @@ import { files } from "../lib/files";
 import { paths } from "../lib/paths";
 import { isValidEnvironmentName } from "./envIsValidEnvironmentName";
 import { listSummary, summaryFor } from "./envListSummary";
-import { get } from "./envGet";
+import { get, getPrivateKeys } from "./envGet";
 import { userstore } from "../lib/userstore";
 import { envPrivates } from "../lib/envPrivates";
 
@@ -238,6 +238,7 @@ export const env = {
   summaryFor,
   getPrompts,
   get,
+  getPrivateKeys,
   create,
   update,
   delete: del,

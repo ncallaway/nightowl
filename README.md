@@ -70,7 +70,7 @@ owl history show [id] # show the details for a particular request
 [x] owl env put local host="http://localhost:3000" token='token'
 [x] owl env put staging host="http://staging.example.com"
 [x] owl env put staging --private token='my-secret-token'
-owl env patch staging --private token='my-secret-token'
+[x] owl env patch staging --private token='my-secret-token'
 [x] owl env put local some.key='{"json":true}'
 [x] owl env patch local '{"host": "http://localhost:3000}", "token": "token", "some": { "key": false } }'
 [x] owl env patch local --unset some.key --unset token

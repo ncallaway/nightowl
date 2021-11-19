@@ -1,6 +1,6 @@
 import _ from "lodash";
 import { err, ok, Result } from "neverthrow";
-import { RenderedEnvironment } from "..";
+import { EnvironmentPrivateDefinition, RenderedEnvironment } from "..";
 import { files } from "../lib/files";
 import { paths } from "../lib/paths";
 import { userstore } from "../lib/userstore";
@@ -38,7 +38,16 @@ export const get = async (env: string, prompts: any = {}): Promise<Result<Render
   await userstore.saveEnvPrivateValues(env, renderedPrivates);
 
   const renderedEnv: RenderedEnvironment = _.assign({}, savedEnv.values, renderedPrivates);
-  console.log("RENDERED: ", renderedEnv);
-
   return ok(renderedEnv);
+};
+
+export const getPrivateKeys = async (env: string): Promise<Result<EnvironmentPrivateDefinition[], string>> => {
+  const envPath = await paths.envPath(env);
+
+  const resEnvRaw = await files.readJson(envPath);
+  if (resEnvRaw.isErr()) {
+    return err(resEnvRaw.error);
+  }
+  const envRaw = resEnvRaw.value as SavedEnvironment;
+  return ok(envRaw.private);
 };
