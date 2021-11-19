@@ -21,11 +21,13 @@
     "@babel/preset-typescript": "^7.15.0",
     "@types/chalk": "^2.2.0",
     "@types/command-line-args": "^5.2.0",
+    "@types/conf": "^3.0.0",
     "@types/jest": "^27.0.2",
     "@types/lodash": "^4.14.175",
     "@types/mkdirp": "^1.0.2",
     "@types/node": "^16.10.3",
     "@types/nunjucks": "^3.2.0",
+    "@types/prompts": "^2.0.14",
     "@types/signale": "^1.4.2",
     "@typescript-eslint/eslint-plugin": "^4.33.0",
     "@typescript-eslint/parser": "^4.33.0",
@@ -44,11 +46,13 @@
   "dependencies": {
     "chalk": "^4.1.2",
     "command-line-args": "^5.2.0",
+    "conf": "git://github.com/ncallaway/conf.git#699698c09eea55413e80d3e0dccd6cdca57fcdae",
     "lodash": "^4.17.21",
     "mkdirp": "^1.0.4",
     "neverthrow": "^4.2.2",
     "node-libcurl": "^2.3.3",
     "nunjucks": "^3.2.3",
+    "prompts": "^2.4.2",
     "signale": "^1.4.0"
   }
 }

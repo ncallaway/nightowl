@@ -9,7 +9,7 @@ const mockReadJson = mockedFn(files.readJson);
 describe("env", () => {
   describe("get", () => {
     it("should read the file successfully", async () => {
-      mockReadJson.mockImplementation(() => Promise.resolve(ok({ hey: "this worked!" })));
+      mockReadJson.mockImplementation(() => Promise.resolve(ok({ values: { hey: "this worked!" }, private: [] })));
 
       const res = await env.get("qa");
       expect(res).toEqual(ok({ hey: "this worked!" }));

@@ -1,16 +1,14 @@
+import chalk from "chalk";
 import { CommandLineOptions } from "command-line-args";
 import { readFile } from "fs/promises";
 import _ from "lodash";
 import nunjucks from "nunjucks";
 import path from "path";
-import { env, Environment, RequestDefinition } from "../../../core";
+import prompts from "prompts";
+import { env, RenderedEnvironment, RequestDefinition } from "../../../core";
 import { RenderedRequest } from "../../../core/insomniaTypes";
 import { Network } from "../../../core/network";
 import { State } from "../../../core/types";
-// import { RequestDefinition } from "../core";
-// import { RenderedRequest } from "../core/insomniaTypes";
-// import { Network } from "../core/network";
-// import { State } from "../core/types";
 import { Command } from "../command";
 
 const run = async (args: CommandLineOptions): Promise<void> => {
@@ -29,15 +27,42 @@ const run = async (args: CommandLineOptions): Promise<void> => {
     }
     envStr = resEnvStr.value;
   }
-  const resLoadedEnv = await env.get(envStr);
+  // get and issue environment prompts
+  const resEnvPrompts = await env.getPrompts(envStr);
+  if (resEnvPrompts.isErr()) {
+    console.error(`\nFailed to send request (error loading environment: ${resEnvPrompts.error})`);
+    process.exit(1);
+  }
+  const envPrompts = resEnvPrompts.value;
 
+  const envPrivates = {};
+
+  // prompt and private
+
+  for (const envPrompt of envPrompts) {
+    const response = await prompts({
+      type: "password",
+      name: "val",
+      message: `${envPrompt.description} (${chalk.dim(envPrompt.key)})`,
+      validate: (value) => (Boolean(value) ? true : `Cannot be empty`),
+    });
+
+    if (response.val === undefined) {
+      process.exit(0);
+    }
+
+    const op = _.set({}, envPrompt.key, response.val);
+    _.merge(envPrivates, op);
+  }
+
+  const resLoadedEnv = await env.get(envStr, envPrivates);
   if (resLoadedEnv.isErr()) {
     console.error(`\nFailed to send request (error loading environment: ${resLoadedEnv.error})`);
     process.exit(1);
   }
   const loadedEnv = resLoadedEnv.value;
 
-  // const env = await loadEnv(envStr);
+  // // const env = await loadEnv(envStr);
   const state: State = {};
   const renderedRequest = await renderRequest(requestDefinition, loadedEnv, state);
   const requestResult = await issueRequest(renderedRequest);
@@ -67,7 +92,7 @@ const loadRequest = async (request: string): Promise<RequestDefinition> => {
 
 const renderRequest = async (
   definition: RequestDefinition,
-  env: Environment,
+  env: RenderedEnvironment,
   state: State
 ): Promise<RenderedRequest> => {
   const cloned: RequestDefinition = _.cloneDeep(definition);
@@ -81,12 +106,12 @@ const renderRequest = async (
   };
 };
 
-const template = (content: string, env: Environment, state: State): string => {
+const template = (content: string, env: RenderedEnvironment, state: State): string => {
   const context = buildContext(env, state);
   return nunjucks.renderString(content, context);
 };
 
-const buildContext = (env: Environment, state: State): any => {
+const buildContext = (env: RenderedEnvironment, state: State): any => {
   return {
     env,
     state,

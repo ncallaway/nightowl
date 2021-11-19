@@ -1,1 +1,11 @@
-{ "host": "https://localhost:4000" }
+{
+  "values": {
+    "host": "https://localhost:4000"
+  },
+  "private": [
+    {
+      "key": "token",
+      "description": ""
+    }
+  ]
+}

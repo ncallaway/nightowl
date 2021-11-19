@@ -9,7 +9,7 @@ const readTextFile = async (path: string): Promise<Result<string, string>> => {
     return err("" + error);
   }
 };
-const readJson = async (path: string): Promise<Result<any, string>> => {
+const readJson = async (path: string): Promise<Result<unknown, string>> => {
   const resRawFile = await readTextFile(path);
 
   return resRawFile.andThen((content) => {
@@ -27,10 +27,18 @@ const readJson = async (path: string): Promise<Result<any, string>> => {
 };
 
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-const writeJson = async (path: string, json: any): Promise<Result<undefined, string>> => {
+type JsonOptions = {
+  pretty?: boolean;
+};
+const writeJson = async (path: string, json: any, options: JsonOptions = {}): Promise<Result<undefined, string>> => {
   let text = "";
   try {
-    text = JSON.stringify(json);
+    if (options.pretty) {
+      text = JSON.stringify(json, null, 2);
+    } else {
+      text = JSON.stringify(json);
+    }
+
   } catch (error) {
     return err("" + error);
   }

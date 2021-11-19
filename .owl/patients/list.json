@@ -1,5 +1,5 @@
 {
-  "url": "{{ env.host }}/bb413608-6ee2-4675-ae0a-3dedffacb0fe",
+  "url": "{{ env.host }}/patients?token={{ env.token }}",
   "description": "list all patients",
   "method": "post",
   "parameters": [
