@@ -9,10 +9,6 @@ import { env, RenderedEnvironment, RequestDefinition } from "../../../core";
 import { RenderedRequest } from "../../../core/insomniaTypes";
 import { Network } from "../../../core/network";
 import { State } from "../../../core/types";
-// import { RequestDefinition } from "../core";
-// import { RenderedRequest } from "../core/insomniaTypes";
-// import { Network } from "../core/network";
-// import { State } from "../core/types";
 import { Command } from "../command";
 
 const run = async (args: CommandLineOptions): Promise<void> => {
@@ -38,7 +34,6 @@ const run = async (args: CommandLineOptions): Promise<void> => {
     process.exit(1);
   }
   const envPrompts = resEnvPrompts.value;
-  console.log("res env prompts", envPrompts);
 
   const envPrivates = {};
 
@@ -56,13 +51,9 @@ const run = async (args: CommandLineOptions): Promise<void> => {
       process.exit(0);
     }
 
-    console.log(response.val); // => { value: 24 }
-
     const op = _.set({}, envPrompt.key, response.val);
     _.merge(envPrivates, op);
   }
-
-  console.log("SUPER SECRET DATA: ", envPrivates);
 
   const resLoadedEnv = await env.get(envStr, envPrivates);
   if (resLoadedEnv.isErr()) {
@@ -70,8 +61,6 @@ const run = async (args: CommandLineOptions): Promise<void> => {
     process.exit(1);
   }
   const loadedEnv = resLoadedEnv.value;
-
-  console.log("LOADED ENV WITH SECRETS: ", loadedEnv);
 
   // // const env = await loadEnv(envStr);
   const state: State = {};

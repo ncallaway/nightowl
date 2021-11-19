@@ -56,10 +56,7 @@ const parseEnvPutPatchArgs = (args: CommandLineOptions) => {
 
   if (args._unknown) {
     for (const arg of args._unknown) {
-      const parsed = parseArg(arg, values);
-      if (!parsed) {
-        // todo: do something
-      }
+      parseArg(arg, values);
     }
   }
 

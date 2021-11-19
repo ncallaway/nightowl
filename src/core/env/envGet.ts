@@ -23,14 +23,11 @@ export const get = async (env: string, prompts: any = {}): Promise<Result<Render
   // fetch privates
   const savedPrivateValues = await userstore.getEnvPrivateValues(env);
 
-  // todo: render the environment
+  // render the environment
   const renderedPrivates = {};
   for (const privateDesc of savedEnv.private) {
     if (privateDesc.key) {
       const val = _.get(prompts, privateDesc.key) || _.get(savedPrivateValues, privateDesc.key) || undefined;
-      // if (!val) {
-      //   return e / rr(`No value was set for private environment value: ${privateDesc.key}`);
-      // }
       _.set(renderedPrivates, privateDesc.key, val);
     }
   }

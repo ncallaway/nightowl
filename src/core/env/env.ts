@@ -196,7 +196,6 @@ const update = async (env: string, values: any, privates: any, merge = false): P
     }
     base = resEnvRaw.value as SavedEnvironment;
     privateDefinitions = base.private;
-    console.log("got base: ", base);
     savedPrivateValues = await userstore.getEnvPrivateValues(env);
   }
 
