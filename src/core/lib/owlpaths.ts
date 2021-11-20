@@ -1,7 +1,7 @@
 import path from "path";
 import envPaths from "env-paths";
 
-const rootDir = (): string => ".owl";
+const workspaceDir = (): string => ".owl";
 
 const validUserPathCharsRegex = /^[^.\\/:*?"<>|\cA-\cZ][^\\/:*?"<>|\cA-\cZ]*$/;
 
@@ -16,13 +16,17 @@ const globalDataDir = (): string => globalPaths.data;
 const globalTempDir = (): string => globalPaths.temp;
 
 export const owlpaths = {
-  rootDir,
-  envDir: (): string => path.join(rootDir(), ".env"),
-  envPath: async (name: string): Promise<string> => path.join(rootDir(), ".env", `${name}.json`),
-  envConfigPath: (): string => path.join(rootDir(), ".env", ".config"),
-
+  workspaceDir,
   globalDataDir,
   globalTempDir,
+
+  workspaceConfigPath: (): string => path.join(workspaceDir(), ".config"),
+
+  envDir: (): string => path.join(workspaceDir(), ".env"),
+  envPath: async (name: string): Promise<string> => path.join(workspaceDir(), ".env", `${name}.json`),
+  envConfigPath: (): string => path.join(workspaceDir(), ".env", ".config"),
+
+  databasePath: (key: string) => path.join(globalDataDir(), `${key}-store.db`),
 
   isValidUserPathComponent,
 };

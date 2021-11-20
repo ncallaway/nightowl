@@ -82,6 +82,7 @@ const performRequest = (renderedRequest: RenderedRequest, validateSSL = true): P
           timelinePath,
           // environmentId,
           parentId: renderedRequest._id,
+          key: renderedRequest._key,
           bodyCompression: null,
           // Will default to .zip otherwise
           bodyPath: bodyPath || "",
@@ -115,6 +116,7 @@ const performRequest = (renderedRequest: RenderedRequest, validateSSL = true): P
         {
           url: renderedRequest.url,
           parentId: renderedRequest._id,
+          key: renderedRequest._key,
           error: err.message,
           elapsedTime: 0, // 0 because this path is hit during plugin calls
           statusMessage: "Error",
@@ -747,6 +749,8 @@ const performRequest = (renderedRequest: RenderedRequest, validateSSL = true): P
 
         await respond(
           {
+            key: renderedRequest._key,
+            parentId: renderedRequest._id,
             statusMessage,
             error,
             elapsedTime: (curl.getInfo(Curl.info.TOTAL_TIME) as number) * 1000,

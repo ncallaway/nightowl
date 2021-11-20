@@ -36,6 +36,7 @@ export interface RequestBody {
 }
 
 export interface RequestDefinition {
+  _key: string;
   url: string;
   description: string;
   method: string;
@@ -70,6 +71,8 @@ export interface ResponseHeader {
 }
 
 export interface ResponsePatch {
+  key: string;
+  parentId: string;
   bodyCompression?: "zip" | null;
   bodyPath?: string;
   bytesContent?: number;
@@ -81,7 +84,6 @@ export interface ResponsePatch {
   headers?: ResponseHeader[];
   httpVersion?: string;
   message?: string;
-  parentId?: string;
   settingSendCookies?: boolean;
   settingStoreCookies?: boolean;
   statusCode?: number;

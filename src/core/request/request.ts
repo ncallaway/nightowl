@@ -7,6 +7,9 @@ import { err, ok, Result } from "neverthrow";
 import { State } from "../types";
 import { requestRender } from "../lib/requestRender";
 import { Network } from "../insomnia/network";
+import { files } from "../lib/files";
+import { owlpaths } from "../lib/owlpaths";
+import { dbstore } from "../store/dbstore";
 
 const getPrompts = async (request: string, env?: string): Promise<Result<EnvironmentPrompt[], string>> => {
   if (!env) {
@@ -40,6 +43,16 @@ const runRequest = async (
     env = resEnvStr.value;
   }
 
+  // load the workspace config...
+  const resWsConfig = await files.readJson(owlpaths.workspaceConfigPath());
+  if (resWsConfig.isErr()) {
+    return err(resWsConfig.error);
+  }
+  const wsConfig = resWsConfig.value as any;
+  const key = wsConfig.key;
+
+  const db = await dbstore.openDatabase(key);
+
   const resLoadedEnv = await envLib.get(env, prompts);
   if (resLoadedEnv.isErr()) {
     return err(resLoadedEnv.error);
@@ -47,11 +60,16 @@ const runRequest = async (
   const loadedEnv = resLoadedEnv.value;
 
   const requestDefinition = await loadRequest(request);
+  console.log("REQ DEF: ", requestDefinition);
 
   // // const env = await loadEnv(envStr);
   const state: State = {};
   const renderedRequest = await requestRender.render(requestDefinition, loadedEnv, state);
   const requestResult = await issueRequest(renderedRequest);
+
+  await dbstore.saveResponse(db, requestResult);
+
+  await dbstore.closeDatabase(db);
 
   return ok(requestResult);
 };
@@ -69,6 +87,7 @@ const loadRequest = async (request: string): Promise<RequestDefinition> => {
 
   const requestContent = await readFile(requestPath, "utf-8");
   const requestFile = JSON.parse(requestContent) as RequestDefinition;
+  requestFile._key = request;
 
   return requestFile;
 };

@@ -1,6 +1,7 @@
 {
   "include": [
-    "src/**.ts"
+    "src/**.ts",
+    "src/core/store/migrations/*.ts"
   ],
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig.json to read more about this file */
