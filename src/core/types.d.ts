@@ -1,1 +1,2 @@
-export type State = any;
+export type UnknownObject = Record<string, unknown>;
+export type State = UnknownObject;

@@ -50,7 +50,13 @@ const parseArg = (arg: string, target: Record<string, unknown>): boolean => {
   return parsed;
 };
 
-const parseEnvPutPatchArgs = (args: CommandLineOptions) => {
+
+type EnvPutPatchArgs = {
+  values: any;
+  privates: any;
+};
+
+const parseEnvPutPatchArgs = (args: CommandLineOptions): EnvPutPatchArgs => {
   const values: any = {};
   const privates: any = {};
 

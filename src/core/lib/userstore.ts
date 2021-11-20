@@ -1,8 +1,9 @@
 import Conf from "conf";
+import { UnknownObject } from "../types";
 
 const config = new Conf({ configFileMode: 0o600 });
 
-const saveEnvPrivateValues = async (env: string, privates: any): Promise<void> => {
+const saveEnvPrivateValues = async (env: string, privates: UnknownObject): Promise<void> => {
   config.set(envPrivateKey(env), privates);
 };
 

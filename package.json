@@ -6,7 +6,7 @@
   "private": true,
   "scripts": {
     "dev": "npx tsc --watch",
-    "lint": "npx eslint 'src/**/*.{js,ts}'",
+    "lint": "npx eslint src",
     "test": "npx jest",
     "test:coverage": "npx jest --coverage --coverage-directory='coverage' && echo '\nopen ./coverage/lcov-report/index.html'",
     "prepare": "husky install"

@@ -38,7 +38,7 @@ export const HAWK_ALGORITHM_SHA256 = "sha256";
 export const HAWK_ALGORITHM_SHA1 = "sha1";
 
 // HTTP version codes
-const HttpVersions = {
+export const HttpVersions = {
   V1_0: "V1_0",
   V1_1: "V1_1",
   V2_0: "V2_0",

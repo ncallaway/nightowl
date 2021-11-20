@@ -1,4 +1,6 @@
-const allKeysForPrivates = (privates: any, path = ""): string[] => {
+import { UnknownObject } from "../types";
+
+const allKeysForPrivates = (privates: UnknownObject, path = ""): string[] => {
   const topLevelKeys = Object.keys(privates);
 
   const leafKeys = topLevelKeys
@@ -10,7 +12,7 @@ const allKeysForPrivates = (privates: any, path = ""): string[] => {
 
   for (const nodeKey of nodeKeys) {
     const nodePath = path ? `${path}.${nodeKey}` : nodeKey;
-    const node = privates[nodeKey];
+    const node = privates[nodeKey] as UnknownObject;
     allKeys = allKeys.concat(allKeysForPrivates(node, nodePath));
   }
 

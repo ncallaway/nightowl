@@ -25,7 +25,14 @@ import { getAuthHeader } from "./authentication";
 import { buildMultipart } from "./multipart";
 import { v4 as uuidv4 } from "uuid"; // NOTE: This is last because headers might be modified multiple times
 import { resolve as urlResolve } from "url";
-import { AUTH_DIGEST, AUTH_NETRC, AUTH_NTLM, CONTENT_TYPE_FORM_DATA, CONTENT_TYPE_FORM_URLENCODED } from "../constants";
+import {
+  AUTH_DIGEST,
+  AUTH_NETRC,
+  AUTH_NTLM,
+  CONTENT_TYPE_FORM_DATA,
+  CONTENT_TYPE_FORM_URLENCODED,
+  HttpVersions,
+} from "../constants";
 import { Readable, Writable } from "stream";
 import { format as urlFormat, parse as urlParse } from "url";
 import { owlpaths } from "../lib/owlpaths";
@@ -34,15 +41,6 @@ const getDataDirectory = owlpaths.globalDataDir;
 const getTempDir = owlpaths.globalTempDir;
 
 const DISABLE_HEADER_VALUE = "__Di$aB13d__";
-
-// HTTP version codes
-const HttpVersions = {
-  V1_0: "V1_0",
-  V1_1: "V1_1",
-  V2_0: "V2_0",
-  v3: "v3",
-  default: "default",
-} as const;
 
 const cancelRequestFunctionMap: Record<string, () => Promise<void>> = {};
 

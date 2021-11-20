@@ -7,6 +7,7 @@ import { listSummary, summaryFor } from "./envListSummary";
 import { get, getPrivateKeys } from "./envGet";
 import { userstore } from "../lib/userstore";
 import { envPrivates } from "../lib/envPrivates";
+import { UnknownObject } from "../types";
 
 export type RenderedEnvironment = Record<string, unknown>;
 export type EnvironmentPrivateDefinition = {
@@ -174,7 +175,12 @@ const create = async (env: string): Promise<Result<undefined, string>> => {
   return ok(undefined);
 };
 
-const update = async (env: string, values: any, privates: any, merge = false): Promise<Result<undefined, string>> => {
+const update = async (
+  env: string,
+  values: UnknownObject,
+  privates: UnknownObject,
+  merge = false
+): Promise<Result<undefined, string>> => {
   if (!(await exists(env))) {
     return err(`the environment does not exist: ${env}`);
   }

@@ -12,8 +12,8 @@ const isValidUserPathComponent = (str: string): boolean => {
 };
 
 const globalPaths = envPaths("nightowl");
-const globalDataDir = () => globalPaths.data;
-const globalTempDir = () => globalPaths.temp;
+const globalDataDir = (): string => globalPaths.data;
+const globalTempDir = (): string => globalPaths.temp;
 
 export const owlpaths = {
   rootDir,
