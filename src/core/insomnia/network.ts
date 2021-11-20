@@ -1,18 +1,10 @@
+// @ts-ignore
 import { version } from "../../../package.json";
 import { createHash } from "crypto";
 import fs from "fs";
 import _ from "lodash";
 import mkdirp from "mkdirp";
-import {
-  Curl,
-  CurlAuth,
-  CurlCode,
-  CurlFeature,
-  CurlHttpVersion,
-  CurlInfoDebug,
-  CurlNetrc,
-  CurlProgressFunc,
-} from "node-libcurl";
+import { Curl, CurlAuth, CurlCode, CurlFeature, CurlHttpVersion, CurlInfoDebug, CurlNetrc } from "node-libcurl";
 import { join as pathJoin } from "path";
 import tls from "tls";
 import { RequestDefinition } from "..";
@@ -31,7 +23,7 @@ import {
 import { cookiesFromJar, jarFromCookies } from "./cookies";
 import { getAuthHeader } from "./authentication";
 import { buildMultipart } from "./multipart";
-import uuid from "uuid"; // NOTE: This is last because headers might be modified multiple times
+import { v4 as uuidv4 } from "uuid"; // NOTE: This is last because headers might be modified multiple times
 import { resolve as urlResolve } from "url";
 import { AUTH_DIGEST, AUTH_NETRC, AUTH_NTLM, CONTENT_TYPE_FORM_DATA, CONTENT_TYPE_FORM_URLENCODED } from "../constants";
 import { Readable, Writable } from "stream";
@@ -654,7 +646,7 @@ const performRequest = (renderedRequest: RenderedRequest, validateSSL = true): P
       let responseBodyBytes = 0;
       const responsesDir = pathJoin(getDataDirectory(), "responses");
       mkdirp.sync(responsesDir);
-      const responseBodyPath = pathJoin(responsesDir, uuid.v4() + ".response");
+      const responseBodyPath = pathJoin(responsesDir, uuidv4() + ".response");
       const responseBodyWriteStream = fs.createWriteStream(responseBodyPath);
       curl.on("end", () => responseBodyWriteStream.end());
       curl.on("error", () => responseBodyWriteStream.end());
