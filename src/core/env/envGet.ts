@@ -2,12 +2,12 @@ import _ from "lodash";
 import { err, ok, Result } from "neverthrow";
 import { EnvironmentPrivateDefinition, RenderedEnvironment } from "..";
 import { files } from "../lib/files";
-import { paths } from "../lib/paths";
+import { owlpaths } from "../lib/owlpaths";
 import { userstore } from "../lib/userstore";
 import { SavedEnvironment } from "./env";
 
 export const get = async (env: string, prompts: any = {}): Promise<Result<RenderedEnvironment, string>> => {
-  const envPath = await paths.envPath(env);
+  const envPath = await owlpaths.envPath(env);
 
   const resEnvRaw = await files.readJson(envPath);
   if (resEnvRaw.isErr()) {
@@ -39,7 +39,7 @@ export const get = async (env: string, prompts: any = {}): Promise<Result<Render
 };
 
 export const getPrivateKeys = async (env: string): Promise<Result<EnvironmentPrivateDefinition[], string>> => {
-  const envPath = await paths.envPath(env);
+  const envPath = await owlpaths.envPath(env);
 
   const resEnvRaw = await files.readJson(envPath);
   if (resEnvRaw.isErr()) {

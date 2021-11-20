@@ -1,5 +1,7 @@
 // designed to be compatible with insomnia Request (https://github.com/Kong/insomnia/blob/9353a6fb00782e2e5b8adb417f8c58f6d8e53224/packages/insomnia-app/app/models/request.ts#L96)
 
+export type RequestAuthentication = Record<string, any>;
+
 export interface RequestHeader {
   name: string;
   value: string;
@@ -53,10 +55,43 @@ export interface RequestDefinition {
 }
 
 export type RenderedRequest = RequestDefinition & {
+  _id: string;
   cookies: {
     name: string;
-    values: string;
+    value: string;
     disabled?: boolean;
   }[];
   cookieJar: any;
 };
+
+export interface ResponseHeader {
+  name: string;
+  value: string;
+}
+
+export interface ResponsePatch {
+  bodyCompression?: "zip" | null;
+  bodyPath?: string;
+  bytesContent?: number;
+  bytesRead?: number;
+  contentType?: string;
+  elapsedTime: number;
+  environmentId?: string | null;
+  error?: string;
+  headers?: ResponseHeader[];
+  httpVersion?: string;
+  message?: string;
+  parentId?: string;
+  settingSendCookies?: boolean;
+  settingStoreCookies?: boolean;
+  statusCode?: number;
+  statusMessage?: string;
+  timelinePath?: string;
+  url?: string;
+}
+
+export interface ResponseTimelineEntry {
+  name: string;
+  timestamp: number;
+  value: string;
+}

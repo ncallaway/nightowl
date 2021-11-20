@@ -1,5 +1,5 @@
 import { readdir } from "fs/promises";
-import { paths } from "../lib/paths";
+import { owlpaths } from "../lib/owlpaths";
 import { isValidEnvironmentName } from "./envIsValidEnvironmentName";
 
 export type EnvironmentSummary = {
@@ -9,7 +9,7 @@ export type EnvironmentSummary = {
 };
 
 export const listSummary = async (): Promise<EnvironmentSummary[]> => {
-  const results = await readdir(paths.envDir(), { withFileTypes: true });
+  const results = await readdir(owlpaths.envDir(), { withFileTypes: true });
 
   const envNames = results
     .filter((dirent) => dirent.isFile())

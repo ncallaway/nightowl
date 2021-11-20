@@ -1,4 +1,5 @@
 import path from "path";
+import envPaths from "env-paths";
 
 const rootDir = (): string => ".owl";
 
@@ -10,11 +11,18 @@ const isValidUserPathComponent = (str: string): boolean => {
   return isTrimmed && isValidChars;
 };
 
-export const paths = {
+const globalPaths = envPaths("nightowl");
+const globalDataDir = () => globalPaths.data;
+const globalTempDir = () => globalPaths.temp;
+
+export const owlpaths = {
   rootDir,
   envDir: (): string => path.join(rootDir(), ".env"),
   envPath: async (name: string): Promise<string> => path.join(rootDir(), ".env", `${name}.json`),
   envConfigPath: (): string => path.join(rootDir(), ".env", ".config"),
+
+  globalDataDir,
+  globalTempDir,
 
   isValidUserPathComponent,
 };

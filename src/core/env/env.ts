@@ -1,7 +1,7 @@
 import _ from "lodash";
 import { err, ok, Result } from "neverthrow";
 import { files } from "../lib/files";
-import { paths } from "../lib/paths";
+import { owlpaths } from "../lib/owlpaths";
 import { isValidEnvironmentName } from "./envIsValidEnvironmentName";
 import { listSummary, summaryFor } from "./envListSummary";
 import { get, getPrivateKeys } from "./envGet";
@@ -24,7 +24,7 @@ export type EnvironmentPrompt = {
 };
 
 const getPrompts = async (env: string): Promise<Result<EnvironmentPrompt[], string>> => {
-  const envPath = await paths.envPath(env);
+  const envPath = await owlpaths.envPath(env);
 
   const resEnvRaw = await files.readJson(envPath);
   if (resEnvRaw.isErr()) {
@@ -48,7 +48,7 @@ const setDefault = async (env: string): Promise<Result<undefined, string>> => {
   }
 
   // read config file
-  const resJson = await files.readJson(paths.envConfigPath());
+  const resJson = await files.readJson(owlpaths.envConfigPath());
 
   if (resJson.isErr()) {
     return err(resJson.error);
@@ -57,7 +57,7 @@ const setDefault = async (env: string): Promise<Result<undefined, string>> => {
   const config = resJson.value as any;
   config.default = env;
 
-  const resWrite = await files.writeJson(paths.envConfigPath(), config);
+  const resWrite = await files.writeJson(owlpaths.envConfigPath(), config);
   if (resWrite.isErr()) {
     return err(resWrite.error);
   }
@@ -67,7 +67,7 @@ const setDefault = async (env: string): Promise<Result<undefined, string>> => {
 
 const getDefault = async (): Promise<Result<string, string>> => {
   // get the configured default
-  const resConfig = await files.readJson(paths.envConfigPath());
+  const resConfig = await files.readJson(owlpaths.envConfigPath());
   if (resConfig.isOk()) {
     const config = resConfig.value as any;
     if (config.default && (await exists(config.default))) {
@@ -109,7 +109,7 @@ const del = async (env: string): Promise<Result<undefined, string>> => {
     return err(`the environment does not exist: ${env}`);
   }
 
-  const envPath = await paths.envPath(env);
+  const envPath = await owlpaths.envPath(env);
 
   // is default?
   // is last?
@@ -132,8 +132,8 @@ const rename = async (oldEnv: string, newEnv: string): Promise<Result<undefined,
   }
   const wasDefault = resDefault.value == oldEnv;
 
-  const oldEnvPath = await paths.envPath(oldEnv);
-  const newEnvPath = await paths.envPath(newEnv);
+  const oldEnvPath = await owlpaths.envPath(oldEnv);
+  const newEnvPath = await owlpaths.envPath(newEnv);
 
   const resFiles = await files.move(oldEnvPath, newEnvPath);
   if (resFiles.isErr()) {
@@ -159,7 +159,7 @@ const create = async (env: string): Promise<Result<undefined, string>> => {
   const list = await listSummary();
   const noEnviroments = list.length == 0;
 
-  const envPath = await paths.envPath(env);
+  const envPath = await owlpaths.envPath(env);
 
   const writeRes = await files.writeJson(envPath, {});
 
@@ -189,7 +189,7 @@ const update = async (env: string, values: any, privates: any, merge = false): P
   };
 
   if (merge) {
-    const envPath = await paths.envPath(env);
+    const envPath = await owlpaths.envPath(env);
     const resEnvRaw = await files.readJson(envPath);
     if (resEnvRaw.isErr()) {
       return err(resEnvRaw.error);
@@ -228,7 +228,7 @@ const update = async (env: string, values: any, privates: any, merge = false): P
 
   await userstore.saveEnvPrivateValues(env, savedPrivateValues);
 
-  const envPath = await paths.envPath(env);
+  const envPath = await owlpaths.envPath(env);
   return files.writeJson(envPath, updated, { pretty: true });
 };
 

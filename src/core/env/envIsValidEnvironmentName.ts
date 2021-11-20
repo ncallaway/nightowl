@@ -1,5 +1,5 @@
-import { paths } from "../lib/paths";
+import { owlpaths } from "../lib/owlpaths";
 
 export const isValidEnvironmentName = (env: string): boolean => {
-  return paths.isValidUserPathComponent(env);
+  return owlpaths.isValidUserPathComponent(env);
 };

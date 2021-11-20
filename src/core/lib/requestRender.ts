@@ -3,6 +3,7 @@ import { RenderedRequest } from "../insomniaTypes";
 import { State } from "../types";
 import nunjucks from "nunjucks";
 import _ from "lodash";
+import { v4 as genuuid } from "uuid";
 
 const render = async (
   definition: RequestDefinition,
@@ -17,6 +18,7 @@ const render = async (
 
   return {
     ...cloned,
+    _id: genuuid(),
     cookies: [],
     cookieJar: {},
   };

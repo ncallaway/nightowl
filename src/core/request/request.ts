@@ -1,12 +1,12 @@
 // do a thing
 import { readFile } from "fs/promises";
 import { env as envLib, EnvironmentPrompt } from "../env/env";
-import type { RenderedRequest, RequestDefinition } from "../insomniaTypes";
+import type { RenderedRequest, RequestDefinition, ResponsePatch } from "../insomniaTypes";
 import path from "path";
 import { err, ok, Result } from "neverthrow";
 import { State } from "../types";
 import { requestRender } from "../lib/requestRender";
-import { Network } from "../network";
+import { Network } from "../insomnia/network";
 
 const getPrompts = async (request: string, env?: string): Promise<Result<EnvironmentPrompt[], string>> => {
   if (!env) {
@@ -31,7 +31,7 @@ const runRequest = async (
   request: string,
   env: string,
   prompts: Record<string, unknown>
-): Promise<Result<number, string>> => {
+): Promise<Result<ResponsePatch, string>> => {
   if (!env) {
     const resEnvStr = await envLib.getActive();
     if (resEnvStr.isErr()) {
@@ -61,7 +61,7 @@ export const request = {
   runRequest,
 };
 
-const issueRequest = (rendered: RenderedRequest): Promise<number> => Network.performRequest(rendered);
+const issueRequest = (rendered: RenderedRequest): Promise<ResponsePatch> => Network.performRequest(rendered);
 
 const loadRequest = async (request: string): Promise<RequestDefinition> => {
   const req = `${request}.json`;
