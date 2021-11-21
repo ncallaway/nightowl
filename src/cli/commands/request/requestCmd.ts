@@ -2,7 +2,8 @@ import chalk from "chalk";
 import { CommandLineOptions } from "command-line-args";
 import _ from "lodash";
 import prompts from "prompts";
-import { request } from "../../../core";
+import { request, store } from "../../../core";
+import { printResponseUtil } from "../../lib/print/printResponseUtil";
 import { Command } from "../command";
 
 const run = async (args: CommandLineOptions): Promise<void> => {
@@ -10,6 +11,15 @@ const run = async (args: CommandLineOptions): Promise<void> => {
     console.log("a request name must be provided");
     process.exit(1);
   }
+
+  // load the store
+
+  const resOwlStore = await store.openStore();
+  if (resOwlStore.isErr()) {
+    console.error(`\nFailed to open the data store (${resOwlStore.error})`);
+    process.exit(1);
+  }
+  const owlStore = resOwlStore.value;
 
   const resReqPrompts = await request.getPrompts(args.request, args.env);
   if (resReqPrompts.isErr()) {
@@ -56,25 +66,16 @@ const run = async (args: CommandLineOptions): Promise<void> => {
     _.merge(promptValues, op);
   }
 
-  const resReqResult = await request.runRequest(args.request, args.env, promptValues);
+  const resReqResult = await request.runRequest(args.request, args.env, promptValues, owlStore);
   if (resReqResult.isErr()) {
     console.error(`\nFailed to send request (${resReqResult.error})`);
     process.exit(1);
   }
-  const reqResult = resReqResult.value;
+  const result = resReqResult.value;
 
-  // const resLoadedEnv = await env.get(envStr, envPrivates);
-  // if (resLoadedEnv.isErr()) {
-  //   console.error(`\nFailed to send request (error loading environment: ${resLoadedEnv.error})`);
-  //   process.exit(1);
-  // }
-  // const loadedEnv = resLoadedEnv.value;
-
-  // // // const env = await loadEnv(envStr);
-  // const state: State = {};
-  // const renderedRequest = await renderRequest(requestDefinition, loadedEnv, state);
-  // const requestResult = await issueRequest(renderedRequest);
-  console.log("response status: ", reqResult);
+  await store.closeStore(owlStore);
+  console.log("");
+  await printResponseUtil.print(result);
 };
 
 export const RequestCommand: Command = {

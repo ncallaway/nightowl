@@ -3,5 +3,6 @@ export type { SavedEnvironment, RenderedEnvironment, EnvironmentPrivateDefinitio
 
 export { env } from "./env/env";
 export { request } from "./request/request";
+export { store } from "./store/store";
 export * as constants from "./constants";
 

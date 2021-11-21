@@ -36,6 +36,7 @@ import {
 import { Readable, Writable } from "stream";
 import { format as urlFormat, parse as urlParse } from "url";
 import { owlpaths } from "../lib/owlpaths";
+import { render } from "nunjucks";
 
 const getDataDirectory = owlpaths.globalDataDir;
 const getTempDir = owlpaths.globalTempDir;
@@ -114,9 +115,10 @@ const performRequest = (renderedRequest: RenderedRequest, validateSSL = true): P
     const handleError = async (err: Error) => {
       await respond(
         {
-          url: renderedRequest.url,
           parentId: renderedRequest._id,
           key: renderedRequest._key,
+          url: renderedRequest.url,
+          method: renderedRequest.method,
           error: err.message,
           elapsedTime: 0, // 0 because this path is hit during plugin calls
           statusMessage: "Error",
@@ -730,6 +732,8 @@ const performRequest = (renderedRequest: RenderedRequest, validateSSL = true): P
           elapsedTime: (curl.getInfo(Curl.info.TOTAL_TIME) as number) * 1000,
           // @ts-expect-error -- TSCONVERSION appears to be a genuine error
           url: curl.getInfo(Curl.info.EFFECTIVE_URL),
+          // @ts-expect-error -- TSCONVERSION appears to be a genuine error
+          method: curl.getInfo(Curl.info.EFFECTIVE_METHOD),
         };
         // Close the request
         curl.close();
@@ -751,6 +755,8 @@ const performRequest = (renderedRequest: RenderedRequest, validateSSL = true): P
           {
             key: renderedRequest._key,
             parentId: renderedRequest._id,
+            url: renderedRequest.url,
+            method: renderedRequest.method,
             statusMessage,
             error,
             elapsedTime: (curl.getInfo(Curl.info.TOTAL_TIME) as number) * 1000,

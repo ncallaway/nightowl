@@ -21,7 +21,8 @@ export async function up(db: Knex): Promise<void> {
     t.integer("status_code");
     t.string("status_message");
     t.string("timeline_path");
-    t.text("url");
+    t.text("url").notNullable();
+    t.text("method").notNullable();
   });
 
   await db.schema.createTable("states", (t) => {

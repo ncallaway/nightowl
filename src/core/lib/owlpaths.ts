@@ -26,7 +26,7 @@ export const owlpaths = {
   envPath: async (name: string): Promise<string> => path.join(workspaceDir(), ".env", `${name}.json`),
   envConfigPath: (): string => path.join(workspaceDir(), ".env", ".config"),
 
-  databasePath: (key: string) => path.join(globalDataDir(), `${key}-store.db`),
+  databasePath: (key: string): string => path.join(globalDataDir(), `${key}-store.db`),
 
   isValidUserPathComponent,
 };

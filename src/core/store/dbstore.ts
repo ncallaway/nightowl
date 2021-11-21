@@ -40,19 +40,17 @@ const openDatabase = async (key: string): Promise<Knex> => {
     // },
   });
 
-  console.log("starting migrations");
   await db.migrate.latest();
-  console.log("finished migrations");
 
   return db;
 };
 
-const saveResponse = async (db: Knex, response: ResponsePatch) => {
+const saveResponse = async (db: Knex, response: ResponsePatch): Promise<void> => {
   const row = responseToRow(response);
   await db("requests").insert(row).onConflict(["request_id"]).merge();
 };
 
-const closeDatabase = async (db: Knex) => {
+const closeDatabase = async (db: Knex): Promise<void> => {
   await db.destroy();
 };
 
@@ -63,7 +61,6 @@ export const dbstore = {
 };
 
 const responseToRow = (response: ResponsePatch): ResponseRow => {
-  console.log("SAVING RESPONSE: ", response);
   return {
     request_id: response.parentId,
     request_key: response.key,
@@ -83,6 +80,7 @@ const responseToRow = (response: ResponsePatch): ResponseRow => {
     status_message: response.statusMessage,
     timeline_path: response.timelinePath,
     url: response.url,
+    method: response.method,
   };
 };
 
@@ -106,5 +104,6 @@ type ResponseRow = {
   status_code?: number;
   status_message?: string;
   timeline_path?: string;
-  url?: string;
+  url: string;
+  method: string;
 };

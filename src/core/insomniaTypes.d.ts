@@ -89,7 +89,8 @@ export interface ResponsePatch {
   statusCode?: number;
   statusMessage?: string;
   timelinePath?: string;
-  url?: string;
+  method: string;
+  url: string;
 }
 
 export interface ResponseTimelineEntry {
