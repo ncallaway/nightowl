@@ -12,9 +12,9 @@ A cli for managing a collection of http requests across a collection of environm
 owl init
 
 # running requests
-owl patients/list # issue a patient list request
-owl request patients/list # same as above, but with an explicit subcommand
-owl patients/list --env staging # issue a patient list request to staging
+[x] owl patients/list # issue a patient list request
+[x] owl request patients/list # same as above, but with an explicit subcommand
+[x] owl patients/list --env staging # issue a patient list request to staging
 owl patients/list --param name # issue a patients list request, with the name param
 owl patients/list --param name="John" # issue a patients list request with the name param as john
 owl patients/list --no-param q # issue a patients list request without the q param
@@ -80,12 +80,15 @@ owl history show [id] # show the details for a particular request
 owl env print local --show-private
 
 # state
+owl state print test:1
+owl state list
 owl state create test:1
 owl state rename test:1 test:2
 owl state use test:1
 owl state clear test:1
-owl state pathc test:1 jwt="eyJhbGciOiJIUzI1NiIs..."
-owl state post test:1 jwt="eyJhbGciOiJIUzI1NiIs..."
+owl state patch test:1 jwt="eyJhbGciOiJIUzI1NiIs..."
+owl state put test:1 jwt="eyJhbGciOiJIUzI1NiIs..."
+owl state rm test:1
 
 owl state clear --cookies test:1
 

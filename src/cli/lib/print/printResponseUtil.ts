@@ -19,6 +19,7 @@ const print = async (result: ResponsePatch, options: PrintOptions = {}): Promise
   log("");
   log("");
 
+  log(chalk.dim(result.parentId));
   logOut(`${method} ${result.url}`);
   // console.log(`${chalk.dim(">")} `);
 

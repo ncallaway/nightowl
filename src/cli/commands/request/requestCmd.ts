@@ -28,24 +28,6 @@ const run = async (args: CommandLineOptions): Promise<void> => {
   }
   const reqPrompts = resReqPrompts.value;
 
-  // const requestDefinition = await loadRequest(args.request);
-  // let envStr = args.env;
-  // if (!envStr) {
-  //   const resEnvStr = await env.getActive();
-  //   if (resEnvStr.isErr()) {
-  //     console.error(`\nFailed to send request (error loading environment: ${resEnvStr.error})`);
-  //     process.exit(1);
-  //   }
-  //   envStr = resEnvStr.value;
-  // }
-  // // get and issue environment prompts
-  // const resEnvPrompts = await env.getPrompts(envStr);
-  // if (resEnvPrompts.isErr()) {
-  //   console.error(`\nFailed to send request (error loading environment: ${resEnvPrompts.error})`);
-  //   process.exit(1);
-  // }
-  // const envPrompts = resEnvPrompts.value;
-
   const promptValues = {};
 
   // prompt and private
