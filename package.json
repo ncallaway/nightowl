@@ -1,5 +1,5 @@
 {
-  "name": "nightowl",
+  "name": "nightowl-cli",
   "version": "0.1.1",
   "description": "a cli for managing and issuing a collection of curl requests",
   "main": "index.js",
