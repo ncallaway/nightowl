@@ -42,7 +42,12 @@ export const main = async (): Promise<void> => {
     if (cmd.options) {
       cmdArgs = commandLineArgs(cmd.options, { argv: args, stopAtFirstUnknown: true });
     }
-    cmd.run(cmdArgs);
+    try {
+      await cmd.run(cmdArgs);
+    } catch (err) {
+      console.error("An unexpected error occurred: ", err);
+    }
+
   } else {
     console.log("(no-run for cmd) ", cmd);
   }

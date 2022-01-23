@@ -74,5 +74,38 @@ const loadRequest = async (request: string): Promise<RequestDefinition> => {
   const requestFile = JSON.parse(requestContent) as RequestDefinition;
   requestFile._key = request;
 
+  if (!requestFile.body) {
+    requestFile.body = {};
+  }
+
+  console.log("rf headers", requestFile.headers);
+  if (!requestFile.headers) {
+    requestFile.headers = [];
+  }
+
+  if (!requestFile.authentication) {
+    requestFile.authentication = {};
+  }
+
+  if (!requestFile.parameters) {
+    requestFile.parameters = [];
+  }
+
+  // @ts-expect-error we need an alternative TS type for the file we load, than the rendered definition
+  if (requestFile.body.json) {
+    // @ts-expect-error we need an alternative TS type for the file we load, than the rendered definition
+    requestFile.body.text = JSON.stringify(requestFile.body.json);
+    if (
+      !requestFile.headers.some((h) => {
+        h.name.toLowerCase() == "content-type";
+      })
+    ) {
+      requestFile.headers.push({
+        name: "Content-Type",
+        value: "application/json",
+      });
+    }
+  }
+
   return requestFile;
 };

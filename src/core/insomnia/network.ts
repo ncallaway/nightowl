@@ -214,6 +214,10 @@ const performRequest = (renderedRequest: RenderedRequest, validateSSL = true): P
           setOpt(Curl.option.POST, 1);
           break;
 
+        case "GET":
+          setOpt(Curl.option.HTTPGET, 1);
+          break;
+
         default:
           // IMPORTANT: Only use CUSTOMREQUEST for all but HEAD and POST
           setOpt(Curl.option.CUSTOMREQUEST, renderedRequest.method);

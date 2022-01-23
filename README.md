@@ -77,9 +77,14 @@ owl history show [id] # show the details for a particular request
 [x] owl env rm staging
 [x] owl env rename local dev
 [x] owl env print local
-owl env print local --show-private
+[x] owl env print local --show-private
 
 # state
+owl state patch jwt="eyJhbGciOiJIUzI1NiIs..."
+owl state put jwt="eyJhbGciOiJIUzI1NiIs..."
+owl state clear
+
+
 owl state print test:1
 owl state list
 owl state create test:1
