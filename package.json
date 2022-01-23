@@ -3,7 +3,6 @@
   "version": "0.1.1",
   "description": "a cli for managing and issuing a collection of curl requests",
   "main": "index.js",
-  "private": true,
   "scripts": {
     "dev": "npx tsc --watch",
     "lint": "npx eslint src",

@@ -2,6 +2,7 @@
 
 A cli for managing a collection of http requests across a collection of environments. Designed to be useful as part of local development and integration test suites.
 
+Note: This project is still in development and should not be used.
 
 
 ## CLI Design Examples
