@@ -5,6 +5,7 @@ import { StatePutCommand } from "./statePutCmd";
 import { StatePrintCommand } from "./statePrintCmd";
 import { StateClearCommand } from "./stateClearCmd";
 import { StateMoveCommand } from "./stateMoveCmd";
+import { StateCopyCommand } from "./stateCopyCmd";
 
 export const StateCommand: Command = {
   name: "state",
@@ -17,6 +18,7 @@ export const StateCommand: Command = {
       StatePrintCommand,
       StateClearCommand,
       StateMoveCommand,
+      StateCopyCommand,
     ],
   },
 };

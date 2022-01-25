@@ -6,4 +6,5 @@ export const state = {
   update: stateLib.update,
   clear: stateLib.clear,
   move: stateLib.move,
+  copy: stateLib.copy,
 };

@@ -74,6 +74,13 @@ const moveState = async (db: Knex, state: string, toState: string, env: string, 
   });
 };
 
+const copyState = async (db: Knex, state: string, toState: string, env: string, toEnv: string): Promise<void> => {
+  await db.raw(
+    "insert into states (name, env, value_json, cookies_json) SELECT ? as name, ? as env, value_json, cookies_json FROM states WHERE name = ? AND env = ?",
+    [toState, toEnv, state, env]
+  );
+};
+
 const getStatesForEnv = async (db: Knex, env: string): Promise<State[]> => {
   const rows = await db.select("*").from<StateRow>("states").where("env", "=", env);
   return rows.map(rowToState);
@@ -91,6 +98,7 @@ export const dbstore = {
   getStatesForEnv,
   deleteState,
   moveState,
+  copyState,
   closeDatabase,
 };
 
