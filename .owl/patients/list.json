@@ -12,5 +12,10 @@
       "value": "john",
       "disabled": true
     }
-  ]
+  ],
+  "body": {
+    "json": {
+      "something": "{{ state.jwt }}"
+    }
+  }
 }

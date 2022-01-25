@@ -223,4 +223,5 @@ export const stateLib = {
   move,
   copy,
   isValidStateName,
+  stateOrDefault,
 };

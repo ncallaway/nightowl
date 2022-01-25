@@ -73,6 +73,6 @@ const template = <T>(thing: T, env: RenderedEnvironment, state: State): T => {
 const buildContext = (env: RenderedEnvironment, state: State): any => {
   return {
     env,
-    state,
+    state: state.value,
   };
 };

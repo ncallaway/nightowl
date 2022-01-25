@@ -42,7 +42,7 @@ const run = async (args: CommandLineOptions): Promise<void> => {
       _.merge(promptValues, op);
     }
 
-    const resReqResult = await request.runRequest(args.request, args.env, promptValues, store);
+    const resReqResult = await request.runRequest(args.request, args.env, args.state, promptValues, store);
     if (resReqResult.isErr()) {
       console.error(`\nFailed to send request (${resReqResult.error})`);
       process.exit(1);
@@ -59,6 +59,7 @@ export const RequestCommand: Command = {
   options: [
     { name: "request", defaultOption: true },
     { name: "env", alias: "e" },
+    { name: "state", alias: "s" },
   ],
   run,
 };

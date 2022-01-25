@@ -1,13 +1,13 @@
-// do a thing
 import { readFile } from "fs/promises";
-import { envLib as envLib, EnvironmentPrompt } from "../env/env";
-import type { RenderedRequest, RequestDefinition, ResponsePatch } from "../insomniaTypes";
-import path from "path";
 import { err, ok, Result } from "neverthrow";
-import { OwlStore, State } from "../types";
-import { requestRender } from "../lib/requestRender";
+import path from "path";
+import { EnvironmentPrompt, envLib as envLib } from "../env/env";
 import { Network } from "../insomnia/network";
+import type { RenderedRequest, RequestDefinition, ResponsePatch } from "../insomniaTypes";
+import { requestRender } from "../lib/requestRender";
+import { stateLib } from "../state/state";
 import { dbstore } from "../store/dbstore";
+import { OwlStore } from "../types";
 
 const getPrompts = async (request: string, env?: string): Promise<Result<EnvironmentPrompt[], string>> => {
   const resEnv = await envLib.envOrDefault(env);
@@ -29,17 +29,21 @@ const getPrompts = async (request: string, env?: string): Promise<Result<Environ
 const runRequest = async (
   request: string,
   env: string | undefined,
+  state: string | undefined,
   prompts: Record<string, unknown>,
   store: OwlStore
 ): Promise<Result<ResponsePatch, string>> => {
-  if (!env) {
-    const resEnvStr = await envLib.getActive();
-    if (resEnvStr.isErr()) {
-      return err(resEnvStr.error);
-    }
-    env = resEnvStr.value;
+  const resState = stateLib.stateOrDefault(state);
+  if (resState.isErr()) {
+    return err(resState.error);
   }
+  state = resState.value;
 
+  const resEnv = await envLib.envOrDefault(env);
+  if (resEnv.isErr()) {
+    return err(resEnv.error);
+  }
+  env = resEnv.value;
   const resLoadedEnv = await envLib.get(env, prompts);
   if (resLoadedEnv.isErr()) {
     return err(resLoadedEnv.error);
@@ -48,13 +52,13 @@ const runRequest = async (
 
   const requestDefinition = await loadRequest(request);
 
-  const state: State = {
-    name: "default",
-    env,
-    cookies: {},
-    value: {},
-  };
-  const renderedRequest = await requestRender.render(requestDefinition, loadedEnv, state);
+  const loadedStateRes = await stateLib.get(state, env, store);
+  if (loadedStateRes.isErr()) {
+    return err(loadedStateRes.error);
+  }
+  const loadedState = loadedStateRes.value;
+
+  const renderedRequest = await requestRender.render(requestDefinition, loadedEnv, loadedState);
   const requestResult = await issueRequest(renderedRequest);
 
   await dbstore.saveResponse(store.db, requestResult);
@@ -81,7 +85,6 @@ const loadRequest = async (request: string): Promise<RequestDefinition> => {
     requestFile.body = {};
   }
 
-  console.log("rf headers", requestFile.headers);
   if (!requestFile.headers) {
     requestFile.headers = [];
   }
