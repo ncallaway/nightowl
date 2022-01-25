@@ -4,4 +4,5 @@ export const state = {
   listSummary: stateLib.listSummary,
   get: stateLib.get,
   update: stateLib.update,
+  clear: stateLib.clear,
 };

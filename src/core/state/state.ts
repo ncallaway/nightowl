@@ -82,6 +82,27 @@ const get = async (
   return ok(loaded);
 };
 
+const clear = async (
+  state: string | undefined,
+  env: string | undefined,
+  store: OwlStore
+): Promise<Result<null, string>> => {
+  const resState = stateOrDefault(state);
+  if (resState.isErr()) {
+    return err(resState.error);
+  }
+  state = resState.value;
+
+  const resEnv = await envLib.envOrDefault(env);
+  if (resEnv.isErr()) {
+    return err(resEnv.error);
+  }
+  env = resEnv.value;
+
+  await dbstore.deleteState(store.db, state, env);
+  return ok(null);
+};
+
 const update = async (
   state: string | undefined,
   env: string | undefined,
@@ -132,5 +153,6 @@ export const stateLib = {
   listSummary,
   get,
   update,
+  clear,
   isValidStateName,
 };
