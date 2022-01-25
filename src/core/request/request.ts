@@ -7,7 +7,7 @@ import type { RenderedRequest, RequestDefinition, ResponsePatch } from "../insom
 import { requestRender } from "../lib/requestRender";
 import { stateLib } from "../state/state";
 import { dbstore } from "../store/dbstore";
-import { OwlStore } from "../types";
+import { OwlStore, UnknownObject } from "../types";
 
 const getPrompts = async (request: string, env?: string): Promise<Result<EnvironmentPrompt[], string>> => {
   const resEnv = await envLib.envOrDefault(env);
@@ -61,7 +61,13 @@ const runRequest = async (
   const renderedRequest = await requestRender.render(requestDefinition, loadedEnv, loadedState);
   const requestResult = await issueRequest(renderedRequest);
 
+  // save the response, and the cookie store
   await dbstore.saveResponse(store.db, requestResult);
+
+  if (renderedRequest.settingStoreCookies) {
+    loadedState.cookies = renderedRequest.cookieJar.toJSON() as unknown as UnknownObject;
+    await dbstore.saveState(store.db, loadedState);
+  }
 
   return ok(requestResult);
 };

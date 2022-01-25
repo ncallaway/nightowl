@@ -1,5 +1,7 @@
 // designed to be compatible with insomnia Request (https://github.com/Kong/insomnia/blob/9353a6fb00782e2e5b8adb417f8c58f6d8e53224/packages/insomnia-app/app/models/request.ts#L96)
 
+import { CookieJar } from "tough-cookie";
+
 export type RequestAuthentication = Record<string, any>;
 
 export interface RequestHeader {
@@ -62,7 +64,7 @@ export type RenderedRequest = RequestDefinition & {
     value: string;
     disabled?: boolean;
   }[];
-  cookieJar: any;
+  cookieJar: CookieJar;
 };
 
 export interface ResponseHeader {

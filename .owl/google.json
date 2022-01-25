@@ -1,0 +1,6 @@
+{
+  "url": "www.google.com",
+  "description": "get google",
+  "method": "get",
+  "settingSendCookies": true
+}

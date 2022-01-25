@@ -4,6 +4,7 @@ import { State } from "../types";
 import nunjucks from "nunjucks";
 import _ from "lodash";
 import { v4 as genuuid } from "uuid";
+import { CookieJar } from "tough-cookie";
 
 const render = async (
   definition: RequestDefinition,
@@ -19,11 +20,15 @@ const render = async (
   cloned.headers = template(cloned.headers, env, state);
   cloned.authentication = template(cloned.authentication, env, state);
 
+  if (!state.cookies.cookies) {
+    state.cookies.cookies = [];
+  }
+
   return {
     ...cloned,
     _id: genuuid(),
     cookies: [],
-    cookieJar: {},
+    cookieJar: CookieJar.fromJSON(JSON.stringify(state.cookies)),
   };
 };
 

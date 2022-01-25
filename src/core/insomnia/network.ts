@@ -36,7 +36,6 @@ import {
 import { Readable, Writable } from "stream";
 import { format as urlFormat, parse as urlParse } from "url";
 import { owlpaths } from "../lib/owlpaths";
-import { render } from "nunjucks";
 
 const getDataDirectory = owlpaths.globalDataDir;
 const getTempDir = owlpaths.globalTempDir;
@@ -365,7 +364,7 @@ const performRequest = (renderedRequest: RenderedRequest, validateSSL = true): P
         // Tell Curl to store cookies that it receives. This is only important if we receive
         // a cookie on a redirect that needs to be sent on the next request in the chain.
         setOpt(Curl.option.COOKIEFILE, "");
-        const cookies = renderedRequest.cookieJar.cookies || [];
+        const cookies = renderedRequest.cookieJar.getCookiesSync(finalUrl);
 
         for (const cookie of cookies) {
           let expiresTimestamp = 0;
@@ -680,7 +679,7 @@ const performRequest = (renderedRequest: RenderedRequest, validateSSL = true): P
         // Update Cookie Jar
         let currentUrl = finalUrl;
         let setCookieStrings: string[] = [];
-        const jar = jarFromCookies(renderedRequest.cookieJar.cookies);
+        const jar = renderedRequest.cookieJar;
 
         for (const { headers } of allCurlHeadersObjects) {
           // Collect Set-Cookie headers
