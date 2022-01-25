@@ -238,7 +238,19 @@ const update = async (
   return files.writeJson(envPath, updated, { pretty: true });
 };
 
-export const env = {
+const envOrDefault = async (env: string | undefined): Promise<Result<string, string>> => {
+  if (env) {
+    return ok(env);
+  }
+
+  const resEnvStr = await envLib.getActive();
+  if (resEnvStr.isErr()) {
+    return err(resEnvStr.error);
+  }
+  return ok(resEnvStr.value);
+};
+
+export const envLib = {
   listSummary,
   summaryFor,
   getPrompts,
@@ -253,4 +265,5 @@ export const env = {
   getActive,
   isValidEnvironmentName,
   exists,
+  envOrDefault,
 };

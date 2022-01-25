@@ -1,7 +1,15 @@
-import { OwlStore, StateSummary } from "../types";
-import { env as envLib } from "../env/env";
+import _ from "lodash";
 import { err, ok, Result } from "neverthrow";
+import { envLib as envLib } from "../env/env";
 import { dbstore } from "../store/dbstore";
+import { OwlStore, State, StateSummary, UnknownObject } from "../types";
+
+const validStateCharsRegex = /^[A-Za-z0-9][A-Za-z0-9_\-:]*$/;
+const isValidStateName = (state: string): boolean => {
+  const isTrimmed = state == state.trim();
+  const isValidChars = validStateCharsRegex.test(state);
+  return isTrimmed && isValidChars;
+};
 
 const loadStates = async (env: string, store: OwlStore) => {
   const states = await dbstore.getStatesForEnv(store.db, env);
@@ -37,6 +45,66 @@ const listSummary = async (env: string | undefined, store: OwlStore): Promise<Re
   return ok(summaries);
 };
 
-export const state = {
+const stateOrDefault = (state: string | undefined): Result<string, string> => {
+  if (state) {
+    if (!isValidStateName(state)) {
+      return err(`${state} is not a valid state name`);
+    }
+    return ok(state);
+  }
+
+  return ok("default");
+};
+
+const update = async (
+  state: string | undefined,
+  env: string | undefined,
+  values: UnknownObject,
+  store: OwlStore,
+  merge = false
+): Promise<Result<State, string>> => {
+  const resState = stateOrDefault(state);
+  if (resState.isErr()) {
+    return err(resState.error);
+  }
+  state = resState.value;
+
+  const resEnv = await envLib.envOrDefault(env);
+  if (resEnv.isErr()) {
+    return err(resEnv.error);
+  }
+  env = resEnv.value;
+
+  const base: State = (await dbstore.getState(store.db, state, env)) || {
+    name: state,
+    env: env,
+    value: {},
+    cookies: {},
+  };
+
+  if (!merge) {
+    base.value = {};
+  }
+
+  // todo: .assign doesn't do a deep merge the way we will probably want it to,
+  // but .merge doesn't handle `undefined` values the way we want it to. This will
+  // probably need to be replaced with a custom implementation.
+  const updatedValues = _.assign({}, base.value, values);
+
+  const updated: State = {
+    name: state,
+    env,
+    value: updatedValues,
+    cookies: base.cookies,
+  };
+
+  await dbstore.saveState(store.db, updated);
+
+  return ok(updated);
+};
+
+export const stateLib = {
   listSummary,
+  update,
+  isValidStateName,
 };

@@ -1,0 +1,34 @@
+import { CommandLineOptions } from "command-line-args";
+import { state } from "../../../core";
+import { envArgsUtil } from "../../lib/args/envArgsUtil";
+import { storeUtil } from "../../lib/storeUtil";
+import { Command } from "../command";
+
+export const run = async (args: CommandLineOptions): Promise<void> => {
+  if (envArgsUtil.parseArg(args.state, {})) {
+    args._unknown = args._unknown || [];
+    args._unknown.push(args.state);
+    args.state = undefined;
+  }
+
+  const { values } = envArgsUtil.parseEnvPutPatchArgs(args);
+
+  const updateRes = await storeUtil.useStore(async (store) => {
+    return state.update(args.state, args.env, values, store, false);
+  });
+
+  if (updateRes.isErr()) {
+    console.error(`\nCannot update state (${updateRes.error})`);
+    process.exit(1);
+  }
+};
+
+export const StatePutCommand: Command = {
+  name: "patch",
+  options: [
+    { name: "state", defaultOption: true },
+    { name: "env", alias: "e" },
+    { name: "unset", alias: "u", multiple: true },
+  ],
+  run,
+};

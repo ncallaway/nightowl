@@ -56,6 +56,13 @@ const saveState = async (db: Knex, state: State): Promise<void> => {
   await db("states").insert(row).onConflict(["name", "env"]).merge();
 };
 
+const getState = async (db: Knex, state: string, env: string): Promise<State | undefined> => {
+  const rows = await db.select("*").from<StateRow>("states").where("name", "=", state).where("env", "=", env).limit(1);
+  if (rows && rows.length) {
+    return rowToState(rows[0]);
+  }
+};
+
 const getStatesForEnv = async (db: Knex, env: string): Promise<State[]> => {
   const rows = await db.select("*").from<StateRow>("states").where("env", "=", env);
   return rows.map(rowToState);
@@ -69,6 +76,7 @@ export const dbstore = {
   openDatabase,
   saveResponse,
   saveState,
+  getState,
   getStatesForEnv,
   closeDatabase,
 };

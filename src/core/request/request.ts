@@ -1,6 +1,6 @@
 // do a thing
 import { readFile } from "fs/promises";
-import { env as envLib, EnvironmentPrompt } from "../env/env";
+import { envLib as envLib, EnvironmentPrompt } from "../env/env";
 import type { RenderedRequest, RequestDefinition, ResponsePatch } from "../insomniaTypes";
 import path from "path";
 import { err, ok, Result } from "neverthrow";
@@ -10,13 +10,11 @@ import { Network } from "../insomnia/network";
 import { dbstore } from "../store/dbstore";
 
 const getPrompts = async (request: string, env?: string): Promise<Result<EnvironmentPrompt[], string>> => {
-  if (!env) {
-    const resEnvStr = await envLib.getActive();
-    if (resEnvStr.isErr()) {
-      return err(resEnvStr.error);
-    }
-    env = resEnvStr.value;
+  const resEnv = await envLib.envOrDefault(env);
+  if (resEnv.isErr()) {
+    return err(resEnv.error);
   }
+  env = resEnv.value;
 
   // get environment prompts
   const resEnvPrompts = await envLib.getPrompts(env);

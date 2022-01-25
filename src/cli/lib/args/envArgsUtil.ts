@@ -88,4 +88,5 @@ const parseEnvPutPatchArgs = (args: CommandLineOptions): EnvPutPatchArgs => {
 
 export const envArgsUtil = {
   parseEnvPutPatchArgs,
+  parseArg,
 };
