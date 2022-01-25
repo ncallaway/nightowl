@@ -5,4 +5,5 @@ export const state = {
   get: stateLib.get,
   update: stateLib.update,
   clear: stateLib.clear,
+  move: stateLib.move,
 };

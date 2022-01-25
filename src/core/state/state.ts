@@ -149,10 +149,44 @@ const update = async (
   return ok(updated);
 };
 
+const move = async (
+  state: string | undefined,
+  toState: string | undefined,
+  env: string | undefined,
+  toEnv: string | undefined,
+  store: OwlStore
+): Promise<Result<null, string>> => {
+  const resState = stateOrDefault(state);
+  if (resState.isErr()) {
+    return err(resState.error);
+  }
+  state = resState.value;
+  const resToState = stateOrDefault(toState);
+  if (resToState.isErr()) {
+    return err(resToState.error);
+  }
+  toState = resToState.value;
+
+  const resEnv = await envLib.envOrDefault(env);
+  if (resEnv.isErr()) {
+    return err(resEnv.error);
+  }
+  env = resEnv.value;
+  const resToEnv = await envLib.envOrDefault(toEnv);
+  if (resToEnv.isErr()) {
+    return err(resToEnv.error);
+  }
+  toEnv = resToEnv.value;
+
+  await dbstore.moveState(store.db, state, toState, env, toEnv);
+  return ok(null);
+};
+
 export const stateLib = {
   listSummary,
   get,
   update,
   clear,
+  move,
   isValidStateName,
 };

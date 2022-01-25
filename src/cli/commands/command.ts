@@ -5,6 +5,7 @@ import { StateCommand } from "./state/stateCmd";
 
 export type Command = {
   name: string;
+  aliases?: string[];
   options?: OptionDefinition[];
   run?: (args: CommandLineOptions) => Promise<void>;
   subcommands?: Subcommand;
@@ -29,9 +30,13 @@ const getExplicitChildCommand = (command: Command, str: string): Command | null 
     return null;
   }
 
-  const subCmdNames = command.subcommands.commands.map((cmd) => cmd.name) || [];
+  const subCmdNames =
+    command.subcommands.commands.flatMap((cmd) => {
+      const aliases = cmd.aliases || [];
+      return [cmd.name, ...aliases];
+    }) || [];
   if (subCmdNames.includes(str)) {
-    return command.subcommands.commands.find((cmd) => cmd.name == str) || null;
+    return command.subcommands.commands.find((cmd) => cmd.name == str || cmd.aliases?.includes(str)) || null;
   }
   return null;
 };

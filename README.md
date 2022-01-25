@@ -92,7 +92,10 @@ owl history show [id] # show the details for a particular request
 [x] owl state print test:1 --env staging
 
 [x] owl state list
-owl state rename test:1 test:2
+[x] owl state mv test:1 test:2
+[x] owl state rename test:1 test:2
+owl state cp test:1 test:2
+owl state copy test:1 test:2
 [x] owl state clear test:1
 [x] owl state patch test:1 jwt="eyJhbGciOiJIUzI1NiIs..."
 [x] owl state put test:1 jwt="eyJhbGciOiJIUzI1NiIs..."

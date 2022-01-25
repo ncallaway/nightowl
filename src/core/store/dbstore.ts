@@ -67,6 +67,13 @@ const deleteState = async (db: Knex, state: string, env: string): Promise<void> 
   await db("states").where("name", "=", state).where("env", "=", env).del();
 };
 
+const moveState = async (db: Knex, state: string, toState: string, env: string, toEnv: string): Promise<void> => {
+  await db("states").where("name", "=", state).where("env", "=", env).update({
+    name: toState,
+    env: toEnv,
+  });
+};
+
 const getStatesForEnv = async (db: Knex, env: string): Promise<State[]> => {
   const rows = await db.select("*").from<StateRow>("states").where("env", "=", env);
   return rows.map(rowToState);
@@ -83,6 +90,7 @@ export const dbstore = {
   getState,
   getStatesForEnv,
   deleteState,
+  moveState,
   closeDatabase,
 };
 
