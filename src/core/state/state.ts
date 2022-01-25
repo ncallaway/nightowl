@@ -56,6 +56,32 @@ const stateOrDefault = (state: string | undefined): Result<string, string> => {
   return ok("default");
 };
 
+const get = async (
+  state: string | undefined,
+  env: string | undefined,
+  store: OwlStore
+): Promise<Result<State, string>> => {
+  const resState = stateOrDefault(state);
+  if (resState.isErr()) {
+    return err(resState.error);
+  }
+  state = resState.value;
+
+  const resEnv = await envLib.envOrDefault(env);
+  if (resEnv.isErr()) {
+    return err(resEnv.error);
+  }
+  env = resEnv.value;
+
+  const loaded: State = (await dbstore.getState(store.db, state, env)) || {
+    name: state,
+    env: env,
+    value: {},
+    cookies: {},
+  };
+  return ok(loaded);
+};
+
 const update = async (
   state: string | undefined,
   env: string | undefined,
@@ -75,12 +101,11 @@ const update = async (
   }
   env = resEnv.value;
 
-  const base: State = (await dbstore.getState(store.db, state, env)) || {
-    name: state,
-    env: env,
-    value: {},
-    cookies: {},
-  };
+  const baseRes = await get(state, env, store);
+  if (baseRes.isErr()) {
+    return err(baseRes.error);
+  }
+  const base = baseRes.value;
 
   if (!merge) {
     base.value = {};
@@ -105,6 +130,7 @@ const update = async (
 
 export const stateLib = {
   listSummary,
+  get,
   update,
   isValidStateName,
 };
