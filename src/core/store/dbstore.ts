@@ -2,6 +2,7 @@ import { owlpaths } from "../lib/owlpaths";
 import path from "path";
 import knex, { Knex } from "knex";
 import { ResponsePatch } from "../insomniaTypes";
+import { State } from "../types";
 
 const openDatabase = async (key: string): Promise<Knex> => {
   const dbPath = owlpaths.databasePath(key);
@@ -50,6 +51,16 @@ const saveResponse = async (db: Knex, response: ResponsePatch): Promise<void> =>
   await db("requests").insert(row).onConflict(["request_id"]).merge();
 };
 
+const saveState = async (db: Knex, state: State): Promise<void> => {
+  const row = stateToRow(state);
+  await db("states").insert(row).onConflict(["name", "env"]).merge();
+};
+
+const getStatesForEnv = async (db: Knex, env: string): Promise<State[]> => {
+  const rows = await db.select("*").from<StateRow>("states").where("env", "=", env);
+  return rows.map(rowToState);
+};
+
 const closeDatabase = async (db: Knex): Promise<void> => {
   await db.destroy();
 };
@@ -57,7 +68,27 @@ const closeDatabase = async (db: Knex): Promise<void> => {
 export const dbstore = {
   openDatabase,
   saveResponse,
+  saveState,
+  getStatesForEnv,
   closeDatabase,
+};
+
+const stateToRow = (state: State): StateRow => {
+  return {
+    name: state.name,
+    env: state.env,
+    value_json: JSON.stringify(state.value),
+    cookies_json: JSON.stringify(state.cookies),
+  };
+};
+
+const rowToState = (row: StateRow): State => {
+  return {
+    name: row.name,
+    env: row.env,
+    value: parseOr(row.value_json, {}),
+    cookies: parseOr(row.cookies_json, {}),
+  };
 };
 
 const responseToRow = (response: ResponsePatch): ResponseRow => {
@@ -84,6 +115,18 @@ const responseToRow = (response: ResponsePatch): ResponseRow => {
   };
 };
 
+const parseOr = (json: string, def: any) => {
+  if (!json) {
+    return def;
+  }
+
+  try {
+    return JSON.parse(json);
+  } catch (err) {
+    return def;
+  }
+};
+
 type ResponseRow = {
   request_id: string;
   request_key: string;
@@ -106,4 +149,11 @@ type ResponseRow = {
   timeline_path?: string;
   url: string;
   method: string;
+};
+
+type StateRow = {
+  name: string;
+  env: string;
+  value_json: string;
+  cookies_json: string;
 };

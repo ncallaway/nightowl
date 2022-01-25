@@ -30,7 +30,7 @@ const getPrompts = async (request: string, env?: string): Promise<Result<Environ
 
 const runRequest = async (
   request: string,
-  env: string,
+  env: string | undefined,
   prompts: Record<string, unknown>,
   store: OwlStore
 ): Promise<Result<ResponsePatch, string>> => {
@@ -50,7 +50,12 @@ const runRequest = async (
 
   const requestDefinition = await loadRequest(request);
 
-  const state: State = {};
+  const state: State = {
+    name: "default",
+    env,
+    cookies: {},
+    value: {},
+  };
   const renderedRequest = await requestRender.render(requestDefinition, loadedEnv, state);
   const requestResult = await issueRequest(renderedRequest);
 
