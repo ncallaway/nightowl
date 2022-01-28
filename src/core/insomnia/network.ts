@@ -219,7 +219,7 @@ const performRequest = (renderedRequest: RenderedRequest, validateSSL = true): P
 
         default:
           // IMPORTANT: Only use CUSTOMREQUEST for all but HEAD and POST
-          setOpt(Curl.option.CUSTOMREQUEST, renderedRequest.method);
+          setOpt(Curl.option.CUSTOMREQUEST, renderedRequest.method.toUpperCase());
           break;
       }
 
