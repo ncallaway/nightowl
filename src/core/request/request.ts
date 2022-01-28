@@ -1,7 +1,7 @@
 import { readFile } from "fs/promises";
 import { err, ok, Result } from "neverthrow";
 import path from "path";
-import { EnvironmentPrompt, envLib as envLib } from "../env/env";
+import { Prompt, envLib as envLib } from "../env/env";
 import { Network } from "../insomnia/network";
 import type { RenderedRequest, RequestDefinition, ResponsePatch } from "../insomniaTypes";
 import { requestRender } from "../lib/requestRender";
@@ -9,7 +9,12 @@ import { stateLib } from "../state/state";
 import { dbstore } from "../store/dbstore";
 import { OwlStore, UnknownObject } from "../types";
 
-const getPrompts = async (request: string, env?: string): Promise<Result<EnvironmentPrompt[], string>> => {
+type RequestPrompts = {
+  environment: Prompt[];
+  request: Prompt[];
+};
+
+const getPrompts = async (request: string, env?: string): Promise<Result<RequestPrompts, string>> => {
   const resEnv = await envLib.envOrDefault(env);
   if (resEnv.isErr()) {
     return err(resEnv.error);
@@ -23,14 +28,25 @@ const getPrompts = async (request: string, env?: string): Promise<Result<Environ
   }
   const envPrompts = resEnvPrompts.value;
 
-  return ok(envPrompts);
+  // load request and get prompts
+  const resRequestDefinition = await loadRequest(request);
+  if (resRequestDefinition.isErr()) {
+    return err(resRequestDefinition.error);
+  }
+  const requestDefinition = resRequestDefinition.value;
+
+  return ok({
+    environment: envPrompts,
+    request: requestDefinition.prompts,
+  });
 };
 
 const runRequest = async (
   request: string,
   env: string | undefined,
   state: string | undefined,
-  prompts: Record<string, unknown>,
+  envPrompts: Record<string, unknown>,
+  reqPrompts: Record<string, unknown>,
   store: OwlStore
 ): Promise<Result<ResponsePatch, string>> => {
   const resState = stateLib.stateOrDefault(state);
@@ -44,13 +60,17 @@ const runRequest = async (
     return err(resEnv.error);
   }
   env = resEnv.value;
-  const resLoadedEnv = await envLib.get(env, prompts);
+  const resLoadedEnv = await envLib.get(env, envPrompts);
   if (resLoadedEnv.isErr()) {
     return err(resLoadedEnv.error);
   }
   const loadedEnv = resLoadedEnv.value;
 
-  const requestDefinition = await loadRequest(request);
+  const resRequestDefinition = await loadRequest(request);
+  if (resRequestDefinition.isErr()) {
+    return err(resRequestDefinition.error);
+  }
+  const requestDefinition = resRequestDefinition.value;
 
   const loadedStateRes = await stateLib.get(state, env, store);
   if (loadedStateRes.isErr()) {
@@ -58,7 +78,7 @@ const runRequest = async (
   }
   const loadedState = loadedStateRes.value;
 
-  const renderedRequest = await requestRender.render(requestDefinition, loadedEnv, loadedState);
+  const renderedRequest = await requestRender.render(requestDefinition, loadedEnv, loadedState, reqPrompts);
   const requestResult = await issueRequest(renderedRequest);
 
   // save the response, and the cookie store
@@ -79,45 +99,54 @@ export const request = {
 
 const issueRequest = (rendered: RenderedRequest): Promise<ResponsePatch> => Network.performRequest(rendered);
 
-const loadRequest = async (request: string): Promise<RequestDefinition> => {
+const loadRequest = async (request: string): Promise<Result<RequestDefinition, string>> => {
   const req = `${request}.json`;
   const requestPath = path.join(".owl", req);
 
   const requestContent = await readFile(requestPath, "utf-8");
-  const requestFile = JSON.parse(requestContent) as RequestDefinition;
-  requestFile._key = request;
+  const loaded = JSON.parse(requestContent) as Partial<RequestDefinition>;
 
-  if (!requestFile.body) {
-    requestFile.body = {};
+  // validate required fields
+  if (!loaded.url) {
+    return err("the request didn't have a url defined");
   }
 
-  if (!requestFile.headers) {
-    requestFile.headers = [];
-  }
+  const method = loaded.method ?? "get";
+  const headers = loaded.headers ?? [];
 
-  if (!requestFile.authentication) {
-    requestFile.authentication = {};
-  }
-
-  if (!requestFile.parameters) {
-    requestFile.parameters = [];
-  }
-
-  // @ts-expect-error we need an alternative TS type for the file we load, than the rendered definition
-  if (requestFile.body.json) {
-    // @ts-expect-error we need an alternative TS type for the file we load, than the rendered definition
-    requestFile.body.text = JSON.stringify(requestFile.body.json);
+  if (loaded.body?.json) {
+    loaded.body.text = JSON.stringify(loaded.body.json);
     if (
-      !requestFile.headers.some((h) => {
+      !headers.some((h) => {
         h.name.toLowerCase() == "content-type";
       })
     ) {
-      requestFile.headers.push({
+      headers.push({
         name: "Content-Type",
         value: "application/json",
       });
     }
   }
 
-  return requestFile;
+  const constructed: RequestDefinition = {
+    _key: request,
+    url: loaded.url,
+    description: loaded.description ?? `${method} ${loaded.url}`,
+    authentication: loaded.authentication ?? {},
+    body: loaded.body || {},
+    headers,
+    isPrivate: loaded.isPrivate ?? false,
+    metaSortKey: loaded.metaSortKey ?? 9,
+    method,
+    parameters: loaded.parameters ?? [],
+    prompts: loaded.prompts ?? [],
+    settingDisableRenderRequestBody: loaded.settingDisableRenderRequestBody ?? false,
+    settingEncodeUrl: loaded.settingEncodeUrl ?? true,
+    settingFollowRedirects: loaded.settingFollowRedirects ?? "global",
+    settingRebuildPath: loaded.settingRebuildPath ?? true,
+    settingSendCookies: loaded.settingSendCookies ?? true,
+    settingStoreCookies: loaded.settingStoreCookies ?? true,
+  };
+
+  return ok(constructed);
 };

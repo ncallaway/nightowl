@@ -3,6 +3,7 @@ import { CommandLineOptions } from "command-line-args";
 import _ from "lodash";
 import prompts from "prompts";
 import { request } from "../../../core";
+import { envArgsUtil } from "../../lib/args/envArgsUtil";
 import { printResponseUtil } from "../../lib/print/printResponseUtil";
 import { storeUtil } from "../../lib/storeUtil";
 import { Command } from "../command";
@@ -22,11 +23,18 @@ const run = async (args: CommandLineOptions): Promise<void> => {
     }
     const reqPrompts = resReqPrompts.value;
 
-    const promptValues = {};
+    const environmentPrompts = {};
+    const requestPrompts: Record<string, unknown> = {};
+
+    if (args._unknown) {
+      for (const arg of args._unknown) {
+        envArgsUtil.parseArg(arg, requestPrompts);
+      }
+    }
 
     // prompt and private
 
-    for (const reqPrompt of reqPrompts) {
+    for (const reqPrompt of reqPrompts.environment) {
       const response = await prompts({
         type: "password",
         name: "val",
@@ -39,10 +47,37 @@ const run = async (args: CommandLineOptions): Promise<void> => {
       }
 
       const op = _.set({}, reqPrompt.key, response.val);
-      _.merge(promptValues, op);
+      _.merge(environmentPrompts, op);
     }
 
-    const resReqResult = await request.runRequest(args.request, args.env, args.state, promptValues, store);
+    for (const reqPrompt of reqPrompts.request) {
+      if (requestPrompts[reqPrompt.key]) {
+        continue;
+      }
+
+      const response = await prompts({
+        type: "text",
+        name: "val",
+        message: `${reqPrompt.description} (${chalk.dim(reqPrompt.key)})`,
+        validate: (value) => (Boolean(value) ? true : `Cannot be empty`),
+      });
+
+      if (response.val === undefined) {
+        process.exit(0);
+      }
+
+      const op = _.set({}, reqPrompt.key, response.val);
+      _.merge(requestPrompts, op);
+    }
+
+    const resReqResult = await request.runRequest(
+      args.request,
+      args.env,
+      args.state,
+      environmentPrompts,
+      requestPrompts,
+      store
+    );
     if (resReqResult.isErr()) {
       console.error(`\nFailed to send request (${resReqResult.error})`);
       process.exit(1);

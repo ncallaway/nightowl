@@ -1,0 +1,11 @@
+{
+  "url": "{{ env.host }}/patients/{{ prompts.id }}",
+  "description": "get a patient",
+  "method": "get",
+  "prompts": [
+    {
+      "key": "id",
+      "description": "The id of the patient to retrieve"
+    }
+  ]
+}

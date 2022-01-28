@@ -19,12 +19,12 @@ export type SavedEnvironment = {
   private: EnvironmentPrivateDefinition[];
 };
 
-export type EnvironmentPrompt = {
+export type Prompt = {
   key: string;
-  description: string;
+  description?: string;
 };
 
-const getPrompts = async (env: string): Promise<Result<EnvironmentPrompt[], string>> => {
+const getPrompts = async (env: string): Promise<Result<Prompt[], string>> => {
   const envPath = await owlpaths.envPath(env);
 
   const resEnvRaw = await files.readJson(envPath);

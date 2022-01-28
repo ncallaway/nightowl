@@ -35,6 +35,14 @@ export interface RequestBody {
   text?: string;
   fileName?: string;
   params?: RequestBodyParameter[];
+
+  // nightowl additions
+  json?: Record<string, unknown>;
+}
+
+export interface RequestPrompts {
+  key: string;
+  description?: string;
 }
 
 export interface RequestDefinition {
@@ -55,6 +63,9 @@ export interface RequestDefinition {
   settingEncodeUrl: boolean;
   settingRebuildPath: boolean;
   settingFollowRedirects: "on" | "off" | "global";
+
+  // nightowl additions
+  prompts: RequestPrompts[];
 }
 
 export type RenderedRequest = RequestDefinition & {

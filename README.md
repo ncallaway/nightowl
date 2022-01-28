@@ -20,7 +20,9 @@ owl patients/list --param name # issue a patients list request, with the name pa
 owl patients/list --param name="John" # issue a patients list request with the name param as john
 owl patients/list --no-param q # issue a patients list request without the q param
 owl users/login --set-state "auth.jwt={response.body}"
-owl users/login --print "{response.body}"
+owl users/login --body # print only the response body
+[x] owl users/get id=12345
+[x] owl users/get # prompts for the id
 
 # output request
 owl as curl patients/list --env staging # print the curl request
