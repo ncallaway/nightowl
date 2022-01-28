@@ -3,30 +3,47 @@ import fs from "fs/promises";
 import { ResponsePatch } from "../../../core/insomniaTypes";
 
 type PrintOptions = {
+  requestHeaders?: boolean;
   responseHeaders?: boolean;
+  status?: boolean;
+  paths?: boolean;
+  requestId?: boolean;
+  requestUrl?: boolean;
 };
 
 const print = async (result: ResponsePatch, options: PrintOptions = {}): Promise<void> => {
   const method = chalkMethod(result.method, result.method);
-  if (result.timelinePath) {
-    log(chalk.dim(`timeline: ${result.timelinePath}`));
+
+  const anyMetadata =
+    options.paths || options.requestId || options.requestUrl || options.status || options.responseHeaders;
+
+  if (options.paths) {
+    if (result.timelinePath) {
+      log(chalk.dim(`timeline: ${result.timelinePath}`));
+    }
+
+    if (result.bodyPath && result.bytesRead) {
+      log(chalk.dim(`body: ${result.bodyPath}`));
+    }
   }
 
-  if (result.bodyPath && result.bytesRead) {
-    log(chalk.dim(`bodyPath: ${result.bodyPath}`));
+  if (options.requestId) {
+    log(chalk.dim(`request id: ${result.parentId}`));
   }
 
-  log("");
-  log("");
+  if (options.requestUrl) {
+    logOut(`${method} ${result.url}`);
+  }
 
-  log(chalk.dim(result.parentId));
-  logOut(`${method} ${result.url}`);
-  // console.log(`${chalk.dim(">")} `);
+  if (options.requestHeaders) {
+    result.requestHeaders?.forEach((h) => {
+      logOut(`${h.name}: ${h.value}`);
+    });
+  }
 
-  // console.log("");
-  // log(chalk.dim("---"));
-
-  logIn(chalkStatus(result.statusCode, `${result.statusCode} ${result.statusMessage}`));
+  if (options.status) {
+    logIn(chalkStatus(result.statusCode, `${result.statusCode} ${result.statusMessage}`));
+  }
 
   if (options.responseHeaders) {
     result.headers?.forEach((h) => {
@@ -34,7 +51,9 @@ const print = async (result: ResponsePatch, options: PrintOptions = {}): Promise
     });
   }
 
-  log(chalk.dim("---"));
+  if (anyMetadata) {
+    log(chalk.dim("---"));
+  }
 
   if (result.bodyPath && result.bytesRead) {
     if (result.bytesRead < 4096) {

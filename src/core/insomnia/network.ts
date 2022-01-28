@@ -631,6 +631,7 @@ const performRequest = (renderedRequest: RenderedRequest, validateSSL = true): P
       }
 
       // NOTE: This is last because headers might be modified multiple times
+      const requestHeaders = headers.filter((h) => h.name && h.value !== DISABLE_HEADER_VALUE);
       const headerStrings = headers
         .filter((h) => h.name)
         .map((h) => {
@@ -726,6 +727,7 @@ const performRequest = (renderedRequest: RenderedRequest, validateSSL = true): P
         const responsePatch: ResponsePatch = {
           contentType,
           headers,
+          requestHeaders,
           httpVersion,
           statusCode,
           statusMessage,

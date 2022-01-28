@@ -20,7 +20,10 @@ owl patients/list --param name # issue a patients list request, with the name pa
 owl patients/list --param name="John" # issue a patients list request with the name param as john
 owl patients/list --no-param q # issue a patients list request without the q param
 owl users/login --set-state "auth.jwt={response.body}"
-owl users/login --body # print only the response body
+[x] owl users/login # print only the response body
+[x] owl users/login --status --url # print the request method/url and status
+[x] owl users/login -i # print the request method/url, http status, and response headers
+[x] owl users/login -v # print the request method/url, http status, request and response headers
 [x] owl users/get id=12345
 [x] owl users/get # prompts for the id
 
@@ -59,7 +62,7 @@ owl show
 owl rm
 
 # request history
-
+owl last # show the most recent request
 owl history # list last n previous requests
 owl history patients/list # list last n patients/list request
 owl history show [id] # show the details for a particular request

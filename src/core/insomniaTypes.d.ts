@@ -104,6 +104,9 @@ export interface ResponsePatch {
   timelinePath?: string;
   method: string;
   url: string;
+
+  // nightowl addition
+  requestHeaders?: ResponseHeader[];
 }
 
 export interface ResponseTimelineEntry {

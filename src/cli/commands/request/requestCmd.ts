@@ -85,8 +85,14 @@ const run = async (args: CommandLineOptions): Promise<void> => {
     return resReqResult.value;
   });
 
-  console.log("");
-  await printResponseUtil.print(res);
+  await printResponseUtil.print(res, {
+    requestId: args.include || args.verbose,
+    requestUrl: args.url || args.include || args.verbose,
+    requestHeaders: args.verbose,
+    status: args.status || args.include || args.verbose,
+    responseHeaders: args.include || args.verbose,
+    paths: args.include || args.verbose,
+  });
 };
 
 export const RequestCommand: Command = {
@@ -95,6 +101,11 @@ export const RequestCommand: Command = {
     { name: "request", defaultOption: true },
     { name: "env", alias: "e" },
     { name: "state", alias: "s" },
+
+    { name: "verbose", alias: "v", type: Boolean },
+    { name: "include", alias: "i", type: Boolean },
+    { name: "status", type: Boolean },
+    { name: "url", type: Boolean },
   ],
   run,
 };
