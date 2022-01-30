@@ -97,6 +97,7 @@ const run = async (args: CommandLineOptions): Promise<void> => {
 
 export const RequestCommand: Command = {
   name: "request",
+  aliases: ["r"],
   options: [
     { name: "request", defaultOption: true },
     { name: "env", alias: "e" },

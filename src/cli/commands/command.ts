@@ -2,6 +2,7 @@ import { CommandLineOptions, OptionDefinition } from "command-line-args";
 import { EnvCommand } from "./env/envCmd";
 import { RequestCommand } from "./request/requestCmd";
 import { StateCommand } from "./state/stateCmd";
+import { HistoryCommand } from "./history/historyCmd";
 
 export type Command = {
   name: string;
@@ -19,8 +20,8 @@ type Subcommand = {
 const RootCommand: Command = {
   name: "owl",
   subcommands: {
-    default: RequestCommand,
-    commands: [RequestCommand, EnvCommand, StateCommand],
+    default: null,
+    commands: [RequestCommand, EnvCommand, StateCommand, HistoryCommand],
   },
   options: [{ name: "cmd", defaultOption: true }],
 };

@@ -62,10 +62,11 @@ owl show
 owl rm
 
 # request history
-owl last # show the most recent request
+owl last # show the most recent request (would be equivalent to `owl history 1`, accepts the same print arguments as requests)
 owl history # list last n previous requests
 owl history patients/list # list last n patients/list request
-owl history show [id] # show the details for a particular request
+owl history [id] # show the details for a particular request
+owl history 3 # show the 3rd most recent request
 
 # environment managing
 [x] owl env create staging

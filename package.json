@@ -8,7 +8,8 @@
     "lint": "npx eslint src",
     "test": "npx jest",
     "test:coverage": "npx jest --coverage --coverage-directory='coverage' && echo '\nopen ./coverage/lcov-report/index.html'",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "g:migration": "MIGRATIONS_DIR=src/migrations npx knex migrate:make -x ts"
   },
   "bin": {
     "owl": "dist/nightowl.js",
@@ -31,6 +32,7 @@
     "@types/mkdirp": "^1.0.2",
     "@types/node": "^16.10.3",
     "@types/nunjucks": "^3.2.0",
+    "@types/pg": "^8.6.4",
     "@types/prompts": "^2.0.14",
     "@types/signale": "^1.4.2",
     "@types/sqlite3": "^3.1.7",
@@ -51,7 +53,9 @@
   "author": "Noah Callaway",
   "license": "UNLICENSED",
   "dependencies": {
+    "@js-temporal/polyfill": "^0.3.0",
     "chalk": "^4.1.2",
+    "cli-table3": "^0.6.1",
     "command-line-args": "^5.2.0",
     "conf": "git://github.com/ncallaway/conf.git#699698c09eea55413e80d3e0dccd6cdca57fcdae",
     "env-paths": "^ 2.2.1",
@@ -64,6 +68,8 @@
     "neverthrow": "^4.2.2",
     "node-libcurl": "^2.3.3",
     "nunjucks": "^3.2.3",
+    "pg": "^8.7.1",
+    "pg-types": "^3.0.1",
     "prompts": "^2.4.2",
     "signale": "^1.4.0",
     "sqlite3": "^5.0.2",

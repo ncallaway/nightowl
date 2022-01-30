@@ -1,4 +1,5 @@
 import chalk from "chalk";
+import Table from "cli-table3";
 import fs from "fs/promises";
 import { ResponsePatch } from "../../../core/insomniaTypes";
 
@@ -42,7 +43,7 @@ const print = async (result: ResponsePatch, options: PrintOptions = {}): Promise
   }
 
   if (options.status) {
-    logIn(chalkStatus(result.statusCode, `${result.statusCode} ${result.statusMessage}`));
+    logIn(chalkedStatusMessage(result));
   }
 
   if (options.responseHeaders) {
@@ -65,8 +66,45 @@ const print = async (result: ResponsePatch, options: PrintOptions = {}): Promise
   }
 };
 
+const printSummaryTable = async (requests: ResponsePatch[]): Promise<void> => {
+  const table = new Table({
+    head: ["-", "status", "url", "id"],
+    style: {
+      head: [],
+    },
+  });
+
+  const rows = requests.map((r, idx) => {
+    const method = chalkMethod(r.method, r.method);
+
+    const elidedUrl = elide(r.url, 80);
+    const url = `${method} ${elidedUrl}`;
+
+    return [idx + 1, chalkedStatusMessage(r) || "", url, chalk.dim(r.parentId)];
+  });
+
+  table.push(...rows);
+
+  console.log(table.toString());
+};
+
+const elide = (str: string, n = 100) => {
+  if (str.length < n - 1) {
+    return str;
+  }
+
+  const mid = (n - 2) / 2;
+  const fromlast = str.length - (n - 2) / 2;
+
+  const head = String(str).substring(0, mid);
+  const tail = String(str).substring(fromlast);
+
+  return `${head}…${tail}`;
+};
+
 export const printResponseUtil = {
   print,
+  printSummaryTable,
 };
 
 const log = (message?: any, ...optionalParams: any[]) => console.log(message, ...optionalParams);
@@ -77,6 +115,8 @@ const logIn = (message?: any, ...optionalParams: any[]) => {
 const logOut = (message?: any, ...optionalParams: any[]) => {
   log(`${outArrow} ${message}`, ...optionalParams);
 };
+
+const chalkedStatusMessage = (r: ResponsePatch) => chalkStatus(r.statusCode, `${r.statusCode} ${r.statusMessage}`);
 
 const chalkStatus = (statusCode: number | undefined, message: string) => {
   if (!statusCode) {

@@ -3,6 +3,20 @@ import path from "path";
 import knex, { Knex } from "knex";
 import { ResponsePatch } from "../insomniaTypes";
 import { State } from "../types";
+import { Temporal } from "@js-temporal/polyfill";
+import { types } from "pg";
+import { builtins } from "pg-types";
+
+const nullParser = (val: string) => {
+  if (val) {
+    return Temporal.PlainDate.from(val);
+  }
+};
+types.setTypeParser(builtins.DATE as any, nullParser);
+types.setTypeParser(builtins.TIMESTAMP as any, nullParser);
+types.setTypeParser(builtins.TIMESTAMPTZ as any, nullParser);
+types.setTypeParser(builtins.TIME as any, nullParser);
+types.setTypeParser(builtins.TIMETZ as any, nullParser);
 
 const openDatabase = async (key: string): Promise<Knex> => {
   const dbPath = owlpaths.databasePath(key);
@@ -51,6 +65,11 @@ const saveResponse = async (db: Knex, response: ResponsePatch): Promise<void> =>
   await db("requests").insert(row).onConflict(["request_id"]).merge();
 };
 
+const getResponses = async (db: Knex, max: number): Promise<ResponsePatch[]> => {
+  const rows = await db("requests").select<ResponseRow[]>("*").orderBy("sent_at", "desc").limit(max);
+  return rows.map(rowToResponse);
+};
+
 const saveState = async (db: Knex, state: State): Promise<void> => {
   const row = stateToRow(state);
   await db("states").insert(row).onConflict(["name", "env"]).merge();
@@ -93,6 +112,7 @@ const closeDatabase = async (db: Knex): Promise<void> => {
 export const dbstore = {
   openDatabase,
   saveResponse,
+  getResponses,
   saveState,
   getState,
   getStatesForEnv,
@@ -132,6 +152,7 @@ const responseToRow = (response: ResponsePatch): ResponseRow => {
     elapsed_time: response.elapsedTime,
     error: response.error,
     headers_json: response.headers ? JSON.stringify(response.headers) : "[]",
+    request_headers_json: response.requestHeaders ? JSON.stringify(response.requestHeaders) : "[]",
     http_version: response.httpVersion,
     message: response.message,
     setting_send_cookies: response.settingSendCookies,
@@ -141,6 +162,33 @@ const responseToRow = (response: ResponsePatch): ResponseRow => {
     timeline_path: response.timelinePath,
     url: response.url,
     method: response.method,
+    sent_at: response.sentAt.toString(),
+  };
+};
+
+const rowToResponse = (row: ResponseRow): ResponsePatch => {
+  return {
+    parentId: row.request_id,
+    key: row.request_key,
+    bodyCompression: row.body_compression as "zip" | null | undefined,
+    bodyPath: row.body_path,
+    bytesContent: row.bytes_content,
+    bytesRead: row.bytes_read,
+    contentType: row.content_type,
+    elapsedTime: row.elapsed_time,
+    error: row.error,
+    headers: row.headers_json ? JSON.parse(row.headers_json) : [],
+    requestHeaders: row.request_headers_json ? JSON.parse(row.request_headers_json) : [],
+    httpVersion: row.http_version,
+    message: row.message,
+    settingSendCookies: row.setting_send_cookies,
+    settingStoreCookies: row.settings_store_cookies,
+    statusCode: row.status_code,
+    statusMessage: row.status_message,
+    timelinePath: row.timeline_path,
+    url: row.url,
+    method: row.method,
+    sentAt: row.sent_at ? Temporal.Instant.from(row.sent_at) : Temporal.Instant.from("2021-01-01T00:00:00Z"),
   };
 };
 
@@ -168,6 +216,7 @@ type ResponseRow = {
   // environment?: string;
   error?: string;
   headers_json?: string;
+  request_headers_json?: string;
   http_version?: string;
   message?: string;
   // parent_id?: string;
@@ -178,6 +227,7 @@ type ResponseRow = {
   timeline_path?: string;
   url: string;
   method: string;
+  sent_at?: string;
 };
 
 type StateRow = {

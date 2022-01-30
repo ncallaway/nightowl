@@ -1,5 +1,6 @@
 // designed to be compatible with insomnia Request (https://github.com/Kong/insomnia/blob/9353a6fb00782e2e5b8adb417f8c58f6d8e53224/packages/insomnia-app/app/models/request.ts#L96)
 
+import { Temporal } from "@js-temporal/polyfill";
 import { CookieJar } from "tough-cookie";
 
 export type RequestAuthentication = Record<string, any>;
@@ -104,6 +105,7 @@ export interface ResponsePatch {
   timelinePath?: string;
   method: string;
   url: string;
+  sentAt: Temporal.Instant;
 
   // nightowl addition
   requestHeaders?: ResponseHeader[];

@@ -36,6 +36,7 @@ import {
 import { Readable, Writable } from "stream";
 import { format as urlFormat, parse as urlParse } from "url";
 import { owlpaths } from "../lib/owlpaths";
+import { Temporal } from "@js-temporal/polyfill";
 
 const getDataDirectory = owlpaths.globalDataDir;
 const getTempDir = owlpaths.globalTempDir;
@@ -123,6 +124,7 @@ const performRequest = (renderedRequest: RenderedRequest, validateSSL = true): P
           statusMessage: "Error",
           settingSendCookies: renderedRequest.settingSendCookies,
           settingStoreCookies: renderedRequest.settingStoreCookies,
+          sentAt: Temporal.Now.instant(),
         },
         null,
         true
@@ -153,6 +155,7 @@ const performRequest = (renderedRequest: RenderedRequest, validateSSL = true): P
             url: curl.getInfo(Curl.info.EFFECTIVE_URL),
             statusMessage: "Cancelled",
             error: "Request was cancelled",
+            sentAt: Temporal.Now.instant(),
           },
           null,
           true
@@ -732,6 +735,7 @@ const performRequest = (renderedRequest: RenderedRequest, validateSSL = true): P
           statusCode,
           statusMessage,
           bytesContent: responseBodyBytes,
+          sentAt: Temporal.Now.instant(),
           // @ts-expect-error -- TSCONVERSION appears to be a genuine error
           bytesRead: curl.getInfo(Curl.info.SIZE_DOWNLOAD),
           elapsedTime: (curl.getInfo(Curl.info.TOTAL_TIME) as number) * 1000,
@@ -765,6 +769,7 @@ const performRequest = (renderedRequest: RenderedRequest, validateSSL = true): P
             statusMessage,
             error,
             elapsedTime: (curl.getInfo(Curl.info.TOTAL_TIME) as number) * 1000,
+            sentAt: Temporal.Now.instant(),
           },
           null,
           true
