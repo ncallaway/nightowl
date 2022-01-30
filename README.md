@@ -31,7 +31,7 @@ owl users/login --set-state "auth.jwt={response.body}"
 owl as curl patients/list --env staging # print the curl request
 owl copy curl patients/list --env production # print and copy to the clipboard the currequest
 owl curl patients/list --env production -- -H 'Accept: application/json' # issue a patients/list request by actually running curl
-owl show patients/list
+owl details patients/list
 owl export insomnia [outfile]
 owl export postman [outfile]
 owl import insomnia [infile]
@@ -51,7 +51,7 @@ owl rm patients/list
 owl list # list all top level keys
 owl list patients # list all top level keys
 owl list --all # list all requests
-owl show patients/list # show details about the patient/list request
+owl details patients/list # show details about the patient/list request
 
 # interactive editor
 owl create
@@ -62,11 +62,12 @@ owl show
 owl rm
 
 # request history
-owl last # show the most recent request (would be equivalent to `owl history 1`, accepts the same print arguments as requests)
-owl history # list last n previous requests
+[x] owl last # show the most recent request (would be equivalent to `owl show 1`, accepts the same print arguments as requests)
+[x] owl history # list last n previous requests
 owl history patients/list # list last n patients/list request
-owl history [id] # show the details for a particular request
-owl history 3 # show the 3rd most recent request
+
+[x] owl show [id]
+[x] owl show 1
 
 # environment managing
 [x] owl env create staging
