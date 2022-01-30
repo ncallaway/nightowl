@@ -4,7 +4,10 @@ import { ShowCommand } from "./showCmd";
 
 const run = async (args: CommandLineOptions): Promise<void> => {
   args.which = 1;
-  ShowCommand.run(args);
+  if (ShowCommand.run) {
+    ShowCommand.run(args);
+  }
+
 };
 
 export const LastCommand: Command = {

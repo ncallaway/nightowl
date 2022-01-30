@@ -19,7 +19,7 @@ const run = async (args: CommandLineOptions): Promise<void> => {
   if (Number.isInteger(Number(args.which))) {
     const idx = Number(args.which);
     if (idx >= 1 && idx <= requests.length) {
-      request = requests[idx + 1];
+      request = requests[idx - 1];
     }
   }
 
