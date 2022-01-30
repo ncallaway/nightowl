@@ -1,5 +1,6 @@
 import chalk from "chalk";
 import Table from "cli-table3";
+import { CommandLineOptions } from "command-line-args";
 import fs from "fs/promises";
 import { ResponsePatch } from "../../../core/insomniaTypes";
 
@@ -102,9 +103,21 @@ const elide = (str: string, n = 100) => {
   return `${head}…${tail}`;
 };
 
+const printOptionsFromArgs = (args: CommandLineOptions): PrintOptions => {
+  return {
+    requestId: args.include || args.verbose,
+    requestUrl: args.url || args.include || args.verbose,
+    requestHeaders: args.verbose,
+    status: args.status || args.include || args.verbose,
+    responseHeaders: args.include || args.verbose,
+    paths: args.include || args.verbose,
+  };
+};
+
 export const printResponseUtil = {
   print,
   printSummaryTable,
+  printOptionsFromArgs,
 };
 
 const log = (message?: any, ...optionalParams: any[]) => console.log(message, ...optionalParams);

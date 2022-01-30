@@ -85,14 +85,9 @@ const run = async (args: CommandLineOptions): Promise<void> => {
     return resReqResult.value;
   });
 
-  await printResponseUtil.print(res, {
-    requestId: args.include || args.verbose,
-    requestUrl: args.url || args.include || args.verbose,
-    requestHeaders: args.verbose,
-    status: args.status || args.include || args.verbose,
-    responseHeaders: args.include || args.verbose,
-    paths: args.include || args.verbose,
-  });
+  const printOpts = printResponseUtil.printOptionsFromArgs(args);
+
+  await printResponseUtil.print(res, printOpts);
 };
 
 export const RequestCommand: Command = {
