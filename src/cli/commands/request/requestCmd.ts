@@ -3,7 +3,7 @@ import { CommandLineOptions } from "command-line-args";
 import _ from "lodash";
 import prompts from "prompts";
 import { request } from "../../../core";
-import { envArgsUtil } from "../../lib/args/envArgsUtil";
+import { argsUtil } from "../../lib/argsUtil";
 import { printResponseUtil } from "../../lib/print/printResponseUtil";
 import { storeUtil } from "../../lib/storeUtil";
 import { Command } from "../command";
@@ -28,7 +28,7 @@ const run = async (args: CommandLineOptions): Promise<void> => {
 
     if (args._unknown) {
       for (const arg of args._unknown) {
-        envArgsUtil.parseArg(arg, requestPrompts);
+        argsUtil.parseArg(arg, requestPrompts);
       }
     }
 
@@ -98,10 +98,7 @@ export const RequestCommand: Command = {
     { name: "env", alias: "e" },
     { name: "state", alias: "s" },
 
-    { name: "verbose", alias: "v", type: Boolean },
-    { name: "include", alias: "i", type: Boolean },
-    { name: "status", type: Boolean },
-    { name: "url", type: Boolean },
+    ...argsUtil.printOptionsArgs(),
   ],
   run,
 };

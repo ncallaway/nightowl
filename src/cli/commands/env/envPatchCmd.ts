@@ -1,6 +1,6 @@
 import { CommandLineOptions } from "command-line-args";
 import { env } from "../../../core";
-import { envArgsUtil } from "../../lib/args/envArgsUtil";
+import { argsUtil } from "../../lib/argsUtil";
 import { Command } from "../command";
 
 export const run = async (args: CommandLineOptions): Promise<void> => {
@@ -9,7 +9,7 @@ export const run = async (args: CommandLineOptions): Promise<void> => {
     process.exit(1);
   }
 
-  const { values, privates } = envArgsUtil.parseEnvPutPatchArgs(args);
+  const { values, privates } = argsUtil.parseEnvPutPatchArgs(args);
 
   const updateRes = await env.update(args.env, values, privates, true);
   if (updateRes.isErr()) {

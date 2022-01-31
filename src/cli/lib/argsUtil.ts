@@ -50,7 +50,6 @@ const parseArg = (arg: string, target: Record<string, unknown>): boolean => {
   return parsed;
 };
 
-
 type EnvPutPatchArgs = {
   values: any;
   privates: any;
@@ -86,7 +85,27 @@ const parseEnvPutPatchArgs = (args: CommandLineOptions): EnvPutPatchArgs => {
   };
 };
 
-export const envArgsUtil = {
+const printOptionsArgs = () => {
+  return [
+    { name: "verbose", alias: "v", type: Boolean },
+    { name: "include", alias: "i", type: Boolean },
+    { name: "status", type: Boolean },
+    { name: "url", type: Boolean },
+    { name: "no-body", type: Boolean },
+  ];
+};
+
+const outputArgs = () => {
+  return [
+    { name: "plain", type: Boolean },
+    { name: "json", type: Boolean },
+    { name: "no-color", type: Boolean },
+  ];
+};
+
+export const argsUtil = {
   parseEnvPutPatchArgs,
   parseArg,
+  printOptionsArgs,
+  outputArgs,
 };

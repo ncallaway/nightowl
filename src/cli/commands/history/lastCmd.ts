@@ -1,4 +1,5 @@
 import { CommandLineOptions } from "command-line-args";
+import { argsUtil } from "../../lib/argsUtil";
 import { Command } from "../command";
 import { ShowCommand } from "./showCmd";
 
@@ -7,16 +8,10 @@ const run = async (args: CommandLineOptions): Promise<void> => {
   if (ShowCommand.run) {
     ShowCommand.run(args);
   }
-
 };
 
 export const LastCommand: Command = {
   name: "last",
-  options: [
-    { name: "verbose", alias: "v", type: Boolean },
-    { name: "include", alias: "i", type: Boolean },
-    { name: "status", type: Boolean },
-    { name: "url", type: Boolean },
-  ],
+  options: [...argsUtil.printOptionsArgs()],
   run,
 };

@@ -1,8 +1,10 @@
-import chalk from "chalk";
 import Table from "cli-table3";
 import { CommandLineOptions } from "command-line-args";
 import fs from "fs/promises";
 import { ResponsePatch } from "../../../core/insomniaTypes";
+import { g } from "../globals";
+import { colorUtil } from "./colorUtil";
+import { formatUtil } from "./formatUtil";
 
 type PrintOptions = {
   requestHeaders?: boolean;
@@ -11,54 +13,104 @@ type PrintOptions = {
   paths?: boolean;
   requestId?: boolean;
   requestUrl?: boolean;
+  noBody?: boolean;
 };
 
 const print = async (result: ResponsePatch, options: PrintOptions = {}): Promise<void> => {
-  const method = chalkMethod(result.method, result.method);
+  const anyRequest = options.requestHeaders || options.requestUrl;
+  const anyResponse = options.status || options.responseHeaders;
 
-  const anyMetadata =
-    options.paths || options.requestId || options.requestUrl || options.status || options.responseHeaders;
+  const anyMetadata = options.paths || anyRequest || anyResponse;
+
+  const out: any = {};
 
   if (options.paths) {
-    if (result.timelinePath) {
-      log(chalk.dim(`timeline: ${result.timelinePath}`));
-    }
+    out.timelinePath = result.timelinePath;
 
-    if (result.bodyPath && result.bytesRead) {
-      log(chalk.dim(`body: ${result.bodyPath}`));
+    if (result.bytesRead) {
+      out.bodyPath = result.bodyPath;
     }
   }
 
   if (options.requestId) {
-    log(chalk.dim(`request id: ${result.parentId}`));
+    out.requestId = result.parentId;
   }
 
   if (options.requestUrl) {
-    logOut(`${method} ${result.url}`);
+    out.method = result.method;
+    out.url = result.url;
   }
 
   if (options.requestHeaders) {
-    result.requestHeaders?.forEach((h) => {
-      logOut(`${h.name}: ${h.value}`);
-    });
+    out.requesHeaders = result.requestHeaders;
   }
 
   if (options.status) {
-    logIn(chalkedStatusMessage(result));
+    out.statusCode = result.statusCode;
+    out.statusMessage = result.statusMessage;
   }
 
   if (options.responseHeaders) {
-    result.headers?.forEach((h) => {
-      logIn(`${h.name}: ${h.value}`);
-    });
+    out.responseHeaders = result.headers;
   }
 
-  if (anyMetadata) {
-    log(chalk.dim("---"));
+  if (g.json) {
+    if (!options.noBody) {
+      if (result.bodyPath && result.bytesRead) {
+        let body = await fs.readFile(result.bodyPath, "utf-8");
+        try {
+          body = JSON.parse(body);
+        } catch (e: any) {
+          // we'll leave the body as it was if it wasn't json
+        }
+        out.body = body;
+      } else {
+        out.body = null;
+      }
+    }
+
+    console.log(JSON.stringify(out, null, 2));
+    return;
   }
 
-  if (result.bodyPath && result.bytesRead) {
-    if (result.bytesRead < 4096) {
+  if (out.timelinePath) {
+    log(colorUtil.dim(`timeline: ${out.timelinePath}`));
+  }
+
+  if (out.bodyPath) {
+    log(colorUtil.dim(`body: ${out.bodyPath}`));
+  }
+
+  if (out.requestId) {
+    log(colorUtil.dim(`request id: ${out.parentId}`));
+  }
+
+  if (options.requestUrl) {
+    logOut(formatUtil.methurl(result));
+  }
+
+  out.requestHeaders?.forEach((h: any) => {
+    logOut(`${h.name}: ${h.value}`);
+  });
+
+  if (anyRequest && anyResponse) {
+    log(colorUtil.dim("---"));
+  }
+
+  if (options.status) {
+    logIn(formatUtil.statusMessage(result));
+  }
+
+  out.responseHeaders?.forEach((h: any) => {
+    logIn(`${h.name}: ${h.value}`);
+  });
+
+  if (anyMetadata && !options.noBody) {
+    log(colorUtil.dim("---"));
+  }
+
+  if (!options.noBody && result.bodyPath && result.bytesRead) {
+    if (result.bytesRead < 4096 || g.plain) {
       const body = await fs.readFile(result.bodyPath, "utf-8");
       console.log(body);
     } else {
@@ -68,6 +120,22 @@ const print = async (result: ResponsePatch, options: PrintOptions = {}): Promise
 };
 
 const printSummaryTable = async (requests: ResponsePatch[]): Promise<void> => {
+  if (g.json) {
+    const rows = requests.map((r, idx) => {
+      return {
+        row: idx + 1,
+        id: r.parentId,
+        statusCode: r.statusCode,
+        statusMessage: r.statusMessage,
+        method: r.method,
+        url: r.url,
+      };
+    });
+
+    console.log(JSON.stringify(rows, null, 2));
+    return;
+  }
+
   const table = new Table({
     head: ["-", "status", "url", "id"],
     style: {
@@ -76,31 +144,19 @@ const printSummaryTable = async (requests: ResponsePatch[]): Promise<void> => {
   });
 
   const rows = requests.map((r, idx) => {
-    const method = chalkMethod(r.method, r.method);
-
-    const elidedUrl = elide(r.url, 80);
-    const url = `${method} ${elidedUrl}`;
-
-    return [idx + 1, chalkedStatusMessage(r) || "", url, chalk.dim(r.parentId)];
+    const elide = g.plain ? undefined : 80;
+    return [idx + 1, formatUtil.statusMessage(r), formatUtil.methurl(r, elide), colorUtil.dim(r.parentId)];
   });
 
   table.push(...rows);
 
-  console.log(table.toString());
-};
-
-const elide = (str: string, n = 100) => {
-  if (str.length < n - 1) {
-    return str;
+  if (g.plain) {
+    rows.forEach((row) => {
+      console.log(row.join("\t"));
+    });
+  } else {
+    console.log(table.toString());
   }
-
-  const mid = (n - 2) / 2;
-  const fromlast = str.length - (n - 2) / 2;
-
-  const head = String(str).substring(0, mid);
-  const tail = String(str).substring(fromlast);
-
-  return `${head}…${tail}`;
 };
 
 const printOptionsFromArgs = (args: CommandLineOptions): PrintOptions => {
@@ -111,6 +167,7 @@ const printOptionsFromArgs = (args: CommandLineOptions): PrintOptions => {
     status: args.status || args.include || args.verbose,
     responseHeaders: args.include || args.verbose,
     paths: args.include || args.verbose,
+    noBody: args["no-body"],
   };
 };
 
@@ -123,54 +180,11 @@ export const printResponseUtil = {
 const log = (message?: any, ...optionalParams: any[]) => console.log(message, ...optionalParams);
 
 const logIn = (message?: any, ...optionalParams: any[]) => {
-  log(`${inArrow} ${message}`, ...optionalParams);
+  log(`${inArrow()} ${message}`, ...optionalParams);
 };
 const logOut = (message?: any, ...optionalParams: any[]) => {
-  log(`${outArrow} ${message}`, ...optionalParams);
+  log(`${outArrow()} ${message}`, ...optionalParams);
 };
 
-const chalkedStatusMessage = (r: ResponsePatch) => chalkStatus(r.statusCode, `${r.statusCode} ${r.statusMessage}`);
-
-const chalkStatus = (statusCode: number | undefined, message: string) => {
-  if (!statusCode) {
-    return message;
-  }
-
-  if (statusCode < 200) {
-    return chalk.yellow(statusCode);
-  }
-  if (statusCode >= 200 && statusCode < 300) {
-    return chalk.green(statusCode);
-  }
-  if (statusCode >= 300 && statusCode < 400) {
-    return chalk.yellow(statusCode);
-  }
-  if (statusCode >= 400) {
-    return chalk.red(statusCode);
-  }
-};
-
-const chalkMethod = (method: string, message: string) => {
-  if (!method) {
-    return message;
-  }
-
-  const lowerMethod = method.toLowerCase();
-
-  if (lowerMethod == "get") {
-    return chalk.blue(message);
-  }
-
-  if (lowerMethod == "post") {
-    return chalk.green(message);
-  }
-
-  if (lowerMethod == "delete") {
-    return chalk.red(message);
-  }
-
-  return message;
-};
-
-const inArrow = chalk.dim("<");
-const outArrow = chalk.dim(">");
+const inArrow = () => colorUtil.dim("<");
+const outArrow = () => colorUtil.dim(">");

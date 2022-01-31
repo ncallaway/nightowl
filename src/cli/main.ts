@@ -1,6 +1,8 @@
 import commandLineArgs from "command-line-args";
 import { argv } from "process";
 import { Commands } from "./commands/command";
+import { argsUtil } from "./lib/argsUtil";
+import { g } from "./lib/globals";
 
 export const main = async (): Promise<void> => {
   if (argv.length <= 2) {
@@ -9,7 +11,15 @@ export const main = async (): Promise<void> => {
   }
 
   let args = argv.slice(2);
-  /* first - parse the main command name */
+
+  /* first - parse global output options */
+
+  const outputOpts = argsUtil.outputArgs();
+  const outputArgs = commandLineArgs(outputOpts, { argv: args, partial: true });
+  args = outputArgs._unknown || [];
+  g.set(outputArgs);
+
+  /* second - parse the main command name */
 
   let cmd = Commands.RootCommand;
   const mainDefinitions = [{ name: "cmd", defaultOption: true }];
@@ -47,7 +57,6 @@ export const main = async (): Promise<void> => {
     } catch (err) {
       console.error("An unexpected error occurred: ", err);
     }
-
   } else {
     console.log("(no-run for cmd) ", cmd);
   }

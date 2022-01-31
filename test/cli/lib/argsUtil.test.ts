@@ -1,9 +1,9 @@
-import { envArgsUtil } from "../../../src/cli/lib/args/envArgsUtil";
+import { argsUtil } from "../../../src/cli/lib/argsUtil";
 
 describe("envArgsUtil", () => {
   describe("parseEnvPutPatchArgs", () => {
     it("should parse simple assignments", () => {
-      const res = envArgsUtil.parseEnvPutPatchArgs({
+      const res = argsUtil.parseEnvPutPatchArgs({
         _unknown: ["foo=5", '{"bar": {"baz": 10}}', "bar.bang=5"],
       });
 
@@ -13,7 +13,7 @@ describe("envArgsUtil", () => {
     });
 
     it("should handle private values", () => {
-      const res = envArgsUtil.parseEnvPutPatchArgs({
+      const res = argsUtil.parseEnvPutPatchArgs({
         _unknown: ["foo=5"],
         private: ["bar.bang=10"],
       });
@@ -23,7 +23,7 @@ describe("envArgsUtil", () => {
     });
 
     it("should handle unset values", () => {
-      const res = envArgsUtil.parseEnvPutPatchArgs({
+      const res = argsUtil.parseEnvPutPatchArgs({
         unset: ["foo"],
       });
 

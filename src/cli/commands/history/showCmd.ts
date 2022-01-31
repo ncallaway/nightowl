@@ -1,6 +1,7 @@
 import { CommandLineOptions } from "command-line-args";
 import { history } from "../../../core";
 import { ResponsePatch } from "../../../core/insomniaTypes";
+import { argsUtil } from "../../lib/argsUtil";
 import { printResponseUtil } from "../../lib/print/printResponseUtil";
 import { storeUtil } from "../../lib/storeUtil";
 import { Command } from "../command";
@@ -39,13 +40,6 @@ const run = async (args: CommandLineOptions): Promise<void> => {
 
 export const ShowCommand: Command = {
   name: "show",
-  options: [
-    { name: "which", defaultOption: true },
-
-    { name: "verbose", alias: "v", type: Boolean },
-    { name: "include", alias: "i", type: Boolean },
-    { name: "status", type: Boolean },
-    { name: "url", type: Boolean },
-  ],
+  options: [{ name: "which", defaultOption: true }, ...argsUtil.printOptionsArgs()],
   run,
 };
