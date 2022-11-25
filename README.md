@@ -4,7 +4,6 @@ A cli for managing a collection of http requests across a collection of environm
 
 Note: This project is still in development and should not be used.
 
-
 ## CLI Design Examples
 
 ```sh
@@ -114,4 +113,3 @@ owl state unset-cookie test:1 response
 ```
 
 ## Design Goals
-
