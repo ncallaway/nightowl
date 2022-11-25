@@ -9,6 +9,7 @@
   - [ ] all other commands detect no '.owl' directory and print a warning
   - [ ] help command
   - [ ] help for when command isn't known
+  - [ ] add import from curl
 
 - [ ] Start basic documentation
 
