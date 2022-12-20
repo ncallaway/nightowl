@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "npx tsc --watch",
+    "build": "npx tsc",
     "lint": "npx eslint src",
     "test": "npx jest",
     "test:coverage": "npx jest --coverage --coverage-directory='coverage' && echo '\nopen ./coverage/lcov-report/index.html'",

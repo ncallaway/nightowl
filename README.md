@@ -113,3 +113,23 @@ owl state unset-cookie test:1 response
 ```
 
 ## Design Goals
+
+
+## Integration Tests
+- `DOCKER_BUILDKIT=1 docker build -f integration/remote/dockerfile -t nightowl-integration-remote:latest integration/remote`
+- `DOCKER_BUILDKIT=1 docker build -f integration/local/dockerfile -t nightowl-integration-local:latest .`
+- `docker network create nightowl-integration`
+- `docker run -p 127.0.0.1:3000:3000/tcp --network=nightowl-integration --hostname=remote nightowl-integration-remote:latest`
+<!-- - `docker run nightowl-integration-local:latest` -->
+<!-- - `curl -v localhost:3000/` -->
+- `integration/local/runner.sh`
+- ...
+
+
+### Remote Integration Development
+
+To develop on the remote integration endpoint:
+
+- `cd integration/remote`
+- `npm run dev`
+- `curl -v localhost:3000/`

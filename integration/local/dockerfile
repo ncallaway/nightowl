@@ -1,0 +1,25 @@
+FROM node:18.12-alpine
+
+RUN apk add --no-cache jq zsh libcurl python3 alpine-sdk curl-dev
+
+RUN npm i npm@9.2.0 -g
+
+RUN mkdir -p /tests
+RUN mkdir -p /owl
+RUN mkdir -p /runs
+
+COPY --chown=node:node ./package.json ./package-lock.json /owl/
+
+WORKDIR /owl
+RUN npm install && npm cache clean --force
+
+WORKDIR /tests
+
+COPY --chown=node:node ./dist/ /owl/dist/
+RUN npm install -g /owl
+
+COPY --chown=node:node ./integration/local/tests /tests/
+
+WORKDIR /runs
+
+CMD "owl" "--version"
