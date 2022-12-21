@@ -16,10 +16,13 @@ router.get('/json', (ctx) => {
 
 const port = process.env.PORT || 3000;
 app.use(router.routes()).use(router.allowedMethods());
-const foo = app.listen(port);
+const server = app.listen(port);
 
 console.log(`listening on :${port}`);
 
-process.on('SIGINT', function() {
-  foo.close();
-});
+['SIGINT', 'SIGTERM', 'SIGQUIT'].forEach(signal => {
+  process.on(signal, () => {
+    server.close();
+  });
+})
+

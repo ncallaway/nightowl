@@ -1,9 +1,12 @@
 import chalk from "chalk";
 import { Result } from "neverthrow";
 import { env } from "../../../core";
+import { storeUtil } from "../../lib/storeUtil";
 import { Command } from "../command";
 
 export const outputEnvironmentList = async (): Promise<void> => {
+  await storeUtil.ensureStore();
+
   const envs = await env.listSummary();
 
   const resDef: Result<string | null, string> = await env.getDefault();

@@ -5,6 +5,7 @@ import { StateCommand } from "./state/stateCmd";
 import { HistoryCommand } from "./history/historyCmd";
 import { ShowCommand } from "./history/showCmd";
 import { LastCommand } from "./history/lastCmd";
+import { InitCommand } from "./initCmd";
 
 export type Command = {
   name: string;
@@ -23,7 +24,7 @@ const RootCommand: Command = {
   name: "owl",
   subcommands: {
     default: null,
-    commands: [RequestCommand, EnvCommand, StateCommand, HistoryCommand, ShowCommand, LastCommand],
+    commands: [RequestCommand, InitCommand, EnvCommand, StateCommand, HistoryCommand, ShowCommand, LastCommand],
   },
   options: [{ name: "cmd", defaultOption: true }],
 };

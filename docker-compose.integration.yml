@@ -1,0 +1,20 @@
+version: "3.1"
+
+services:
+  remote:
+    user: node
+    build:
+      context: ./integration/remote/
+      dockerfile: ./dockerfile
+    ports:
+      - "127.0.0.1:3000:3000/tcp"
+
+  local:
+    user: node
+    build:
+      context: ./
+      dockerfile: ./integration/local/dockerfile
+    depends_on:
+      - remote
+    volumes:
+      - ./integration/local/tests/:/tests:cached

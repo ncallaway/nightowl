@@ -23,7 +23,7 @@ export const owlpaths = {
   workspaceConfigPath: (): string => path.join(workspaceDir(), ".config"),
 
   envDir: (): string => path.join(workspaceDir(), ".env"),
-  envPath: async (name: string): Promise<string> => path.join(workspaceDir(), ".env", `${name}.json`),
+  envPath: (name: string): string => path.join(workspaceDir(), ".env", `${name}.json`),
   envConfigPath: (): string => path.join(workspaceDir(), ".env", ".config"),
 
   databasePath: (key: string): string => path.join(globalDataDir(), `${key}-store.db`),

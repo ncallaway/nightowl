@@ -1,15 +1,21 @@
 ### Next Features
 
+- [ ] UX necessities:
+
+  - [x] add init command
+  - [ ] all other commands detect no '.owl' directory and print a warning
+    - started, done with commands that useStore
+    - need to add ensureStore to other commands
+  - [ ] help command
+  - [ ] unrecognized command output
+  - [ ] version information
+  - [ ] help for when command isn't known
+  - [ ] add import from curl
+
 - [ ] Print curl command
 - [ ] History commands
 
-- [ ] UX necessities:
 
-  - [ ] add init command
-  - [ ] all other commands detect no '.owl' directory and print a warning
-  - [ ] help command
-  - [ ] help for when command isn't known
-  - [ ] add import from curl
 
 - [ ] Start basic documentation
 
