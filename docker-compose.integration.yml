@@ -18,3 +18,4 @@ services:
       - remote
     volumes:
       - ./integration/local/tests/:/tests:cached
+      - ./dist:/owl/dist/:cached
