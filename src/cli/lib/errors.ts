@@ -14,7 +14,7 @@ export const Errors: Record<OwlErrorKey, ErrorHandler> = {
   'err-store-initialization': { message: "Something went wrong when initalizing the store", exitCode: 5}
 }
 
-export const unwrap = <T,>(res: Result<T, OwlError>) => {
+export const unwrap = <T,>(res: Result<T, OwlError>): T => {
   if (res.isErr()) {
     return errorDie(res.error);
   }
@@ -22,7 +22,7 @@ export const unwrap = <T,>(res: Result<T, OwlError>) => {
   return res.value;
 }
 
-export const errorDie = (err: OwlError) => {
+export const errorDie = (err: OwlError): never => {
   const handler = Errors[err.error];
 
   const message = handler.message;

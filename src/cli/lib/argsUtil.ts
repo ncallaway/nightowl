@@ -1,4 +1,4 @@
-import { CommandLineOptions } from "command-line-args";
+import { CommandLineOptions, OptionDefinition } from "command-line-args";
 import _ from "lodash";
 
 /**
@@ -85,7 +85,7 @@ const parseEnvPutPatchArgs = (args: CommandLineOptions): EnvPutPatchArgs => {
   };
 };
 
-const printOptionsArgs = () => {
+const printOptionsArgs = (): OptionDefinition[] => {
   return [
     { name: "verbose", alias: "v", type: Boolean },
     { name: "include", alias: "i", type: Boolean },
@@ -95,7 +95,7 @@ const printOptionsArgs = () => {
   ];
 };
 
-const outputArgs = () => {
+const outputArgs = (): OptionDefinition[] => {
   return [
     { name: "plain", type: Boolean },
     { name: "json", type: Boolean },

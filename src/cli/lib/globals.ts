@@ -6,7 +6,7 @@ let json = false;
 let plain = true;
 let help = false;
 
-const set = (args: CommandLineOptions) => {
+const set = (args: CommandLineOptions): void => {
   setColor(!colorUtil.noColor(args));
   setJson(args.json);
   setPlain(args.plain);

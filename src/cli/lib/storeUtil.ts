@@ -3,7 +3,7 @@ import { OwlStore } from "../../core/types";
 import { unwrap } from "./errors";
 
 
-const ensureStore = async () => {
+const ensureStore = async (): Promise<void> => {
   const resInspect = await store.inspectStore();
   unwrap(resInspect);
 }

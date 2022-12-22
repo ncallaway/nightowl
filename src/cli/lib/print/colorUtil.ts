@@ -3,7 +3,7 @@ import { CommandLineOptions } from "command-line-args";
 import { stderr, stdout } from "process";
 import { g } from "../globals";
 
-const chalkMethod = (method: string, message: string = method) => {
+const chalkMethod = (method: string, message: string = method): string => {
   if (!method || !g.color) {
     return message;
   }
@@ -25,7 +25,7 @@ const chalkMethod = (method: string, message: string = method) => {
   return message;
 };
 
-const chalkStatus = (statusCode: number | undefined, message: string | undefined = String(statusCode)) => {
+const chalkStatus = (statusCode: number | undefined, message: string | undefined = String(statusCode)): string => {
   if (!statusCode || !g.color) {
     return message;
   }
@@ -44,7 +44,7 @@ const chalkStatus = (statusCode: number | undefined, message: string | undefined
   }
 };
 
-const dim = (message: string) => {
+const dim = (message: string): string => {
   if (!g.color) {
     return message;
   }
