@@ -163,14 +163,20 @@ owl state clear --cookies test:1
 
 owl state set-cookie test:1 response='bar'
 owl state unset-cookie test:1 response
+
+[x] owl version
+[x] owl --version
+[x] owl help
+[x] owl --help
+[x] owl # shows help info
 ```
 
 ## Design Goals
 
 
 ## Integration Tests
-- `docker-compose up -d`
-- `dc -f docker-compose.integration.yml run local zsh /tests/runner.sh`
+- `docker-compose -f docker-compose.integration.yml up -d`
+- `docker-compose -f docker-compose.integration.yml run local zsh /tests/runner.sh`
 
 ### Local Integration Test Development
 

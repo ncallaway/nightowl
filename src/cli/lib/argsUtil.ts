@@ -100,6 +100,8 @@ const outputArgs = () => {
     { name: "plain", type: Boolean },
     { name: "json", type: Boolean },
     { name: "no-color", type: Boolean },
+    { name: "version", type: Boolean },
+    { name: "help", type: Boolean },
   ];
 };
 
