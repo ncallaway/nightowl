@@ -9,6 +9,7 @@
     "lint": "npx eslint src",
     "test": "npx jest",
     "test:coverage": "npx jest --coverage --coverage-directory='coverage' && echo '\nopen ./coverage/lcov-report/index.html'",
+    "integration": "bin/integration.sh",
     "prepare": "husky install",
     "g:migration": "MIGRATIONS_DIR=src/migrations npx knex migrate:make -x ts"
   },
