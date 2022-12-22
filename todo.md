@@ -12,6 +12,8 @@
   - [ ] help for when command isn't known
   - [ ] add import from curl
 
+- [ ] warnings zero
+- [ ] Add integration tests to pre-push hook
 - [ ] Print curl command
 - [ ] History commands
 
