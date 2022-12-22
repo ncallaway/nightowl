@@ -42,6 +42,7 @@ const chalkStatus = (statusCode: number | undefined, message: string | undefined
   if (statusCode >= 400) {
     return chalk.red(statusCode);
   }
+  return "" + statusCode;
 };
 
 const dim = (message: string): string => {
