@@ -50,7 +50,7 @@ $ owl history
 ```sh
 
 # create .owl directory
-owl init
+[x] owl init
 
 # running requests
 [x] owl patients/list # issue a patient list request

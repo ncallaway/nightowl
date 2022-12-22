@@ -11,15 +11,27 @@
   - [x] version information
   - [ ] add import from curl
 
-- [ ] warnings zero
-- [ ] Add integration tests to pre-push hook
+- [x] warnings zero
+- [x] Add integration tests to pre-push hook
+
+- [ ] request editing
+  - [ ] owl list
+    - owl list
+    - owl list [prefix]
+    - owl list --all
+  - [ ] owl remove [request-key]
+  - [ ] owl from curl [request-key] -- [curl]
+  - [ ] owl create
+  - [ ] owl update
+  - [ ] owl details [request-key]
+
 - [ ] Print curl command
 - [ ] History commands
 
 
 
 - [ ] Start basic documentation
-
+  - [ ] Command help documentation
   - [ ] Draft basic getting started information
 
 - [x] move prompts into `core`
