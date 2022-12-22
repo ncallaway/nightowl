@@ -4,6 +4,47 @@ A cli for managing a collection of http requests across a collection of environm
 
 Note: This project is still in development and should not be used.
 
+## Getting Started Example
+
+```sh
+$ owl init
+
+$ owl from curl login -- curl -X POST http:/localhost:3000/login -H "Content-Type: application/json" --data '{"username": "jdoe@example.com", "password": "secret-password"}' # from curl not yet implemented
+# $ owl update login --response-state-update 'jwt=jq(body,.jwt)' # hypothetical
+
+$ owl request login # POST to localhost:3000/login
+{ "jwt": "eyJhbGciOiJIUzI1NiIs..."}
+# state is automatically updated if we have a response state hook
+
+$ owl state patch jwt="eyJhbGciOiJIUzI1NiIs..." # manually store the jwt in our local state
+
+$ owl from curl patients/list -- curl http://localhost:3000/patients -H 'Authorization: Bearer token' # from curl not yet implemented
+$ owl patients/list # GET http://localhost:3000 with bearer `token`
+# 401 response if `token` isn't valid
+
+$ owl update patients/list --url "{env.host}/patients" --header 'Authorization: Bearer {state.jwt}' # update not yet implemented
+
+$ owl env put local host="http://localhost:3000" username="jdoe@example.com" password="secret-password"
+$ owl env put staging host="https://staging.example.com" username="jdoe@example.com" --private password='Xk7hgnB8e!3dzflk3'
+
+$ owl patients/list --env local # GET http://localhost:3000 with bearer `eyJhbGciOiJIUzI1NiIs...`
+$ owl patients/list --env staging # GET https://staging.example.com with a prompt for the jwt
+
+$ owl update login --url "{env.host}/login" --body '{"username": "{env.username}", "password": "{env.password}"}' # update not yet implemented
+$ owl login --env staging # POST https://staging.example.com/login with a prompt for the jwt
+{ "jwt": "eyJhbGciOiJIVwpQQzWa4..."}
+$ owl state patch --env staging jwt="eyJhbGciOiJIVwpQQzWa4..." # manually store the jwt in our local state
+$ owl patients/list --env staging # GET https://staging.example.com with bearer `eyJhbGciOiJIVwpQQzWa4...`
+
+$ owl verify 'status=2XX' 'success(status)' 'body.[].length=4' 'body.[0].lastName=Smith' 'match(body.[0].firstName, /john/i)' 'sorted(body.[].id)' 'sorted(body.[].id, desc)'
+$ owl verify 'status=2XX AMD success(status) AND body.[].length=4 AND body.[0].lastName=Smith AND match(body.[0].firstName, /john/i) AND sorted(body.[].id) AND sorted(body.[].id, desc)'
+$ owl verify 'status=200 AND match(header:authorization, /^Bearer eyJ/) AND request:header:content-type=application/json'
+
+$ owl history
+
+
+```
+
 ## CLI Design Examples
 
 ```sh
@@ -19,6 +60,7 @@ owl patients/list --param name # issue a patients list request, with the name pa
 owl patients/list --param name="John" # issue a patients list request with the name param as john
 owl patients/list --no-param q # issue a patients list request without the q param
 owl users/login --set-state "auth.jwt={response.body}"
+# owl users/login --response-set-state "auth.jwt={response.body}"
 [x] owl users/login # print only the response body
 [x] owl users/login --status --url # print the request method/url and status
 [x] owl users/login -i # print the request method/url, http status, and response headers
@@ -106,10 +148,45 @@ owl history patients/list # list last n patients/list request
 [x] owl state patch test:1 jwt="eyJhbGciOiJIUzI1NiIs..."
 [x] owl state put test:1 jwt="eyJhbGciOiJIUzI1NiIs..."
 
+owl verify [id] --response-status 200,201
+owl verify [id] --response-status 2XX
+owl verify [id] --response-status success
+owl verify [id] --response-status 404
+owl verify [id] --response-status 4XX
+owl verify [id] --response-status error
+owl verify [id] --response-header 'Authorization=Bearer jwt'
+owl verify [id] --response-header-exists Authorization
+owl verify [id] --response-body '{"hello": "world"}'
+owl verify [id] --response-status 2XX --response-json-body-contains '{"ok": true}' --response-header-exists 'Authorization'
+
 owl state clear --cookies test:1
 
 owl state set-cookie test:1 response='bar'
 owl state unset-cookie test:1 response
+
+[x] owl version
+[x] owl --version
+[x] owl help
+[x] owl --help
+[x] owl # shows help info
 ```
 
 ## Design Goals
+
+
+## Integration Tests
+- `docker-compose -f docker-compose.integration.yml up -d`
+- `docker-compose -f docker-compose.integration.yml run local zsh /tests/runner.sh`
+
+### Local Integration Test Development
+
+- Integration tests live in `integration/local/tests`
+- The runner is a simple bash script in `integration/local/tests/runner.sh`
+
+### Remote Integration Development
+
+To develop on the remote integration endpoint:
+
+- `cd integration/remote`
+- `npm run dev`
+- `curl -v localhost:3000/`

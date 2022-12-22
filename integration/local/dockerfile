@@ -1,0 +1,32 @@
+FROM node:18.12-alpine
+
+RUN apk add jq zsh libcurl python3 alpine-sdk curl-dev
+
+RUN npm i npm@9.2.0 -g
+
+RUN mkdir -p /tests
+RUN mkdir -p /owl
+RUN mkdir -p /example
+
+RUN chown node:node /example
+
+COPY --chown=node:node ./package.json ./package-lock.json /owl/
+COPY --chown=node:node ./dist/nightowl.js /owl/dist/nightowl.js
+
+WORKDIR /owl
+RUN npm install && npm cache clean --force
+RUN npm link
+
+RUN npm ls -g
+
+WORKDIR /tests
+
+# COPY --chown=node:node ./dist/nightowl.js /owl/dist/nightowl.js
+# RUN npm install -g /owl
+
+COPY --chown=node:node ./dist/ /owl/dist/
+COPY --chown=node:node ./integration/local/tests /tests/
+
+WORKDIR /example
+
+CMD "owl" "--version"

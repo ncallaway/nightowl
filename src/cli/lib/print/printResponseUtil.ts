@@ -125,6 +125,7 @@ const printSummaryTable = async (requests: ResponsePatch[]): Promise<void> => {
       return {
         row: idx + 1,
         id: r.parentId,
+        key: r.key,
         statusCode: r.statusCode,
         statusMessage: r.statusMessage,
         method: r.method,
@@ -137,7 +138,7 @@ const printSummaryTable = async (requests: ResponsePatch[]): Promise<void> => {
   }
 
   const table = new Table({
-    head: ["-", "status", "url", "id"],
+    head: ["-", "status", "key", "url", "id"],
     style: {
       head: [],
     },
@@ -145,7 +146,7 @@ const printSummaryTable = async (requests: ResponsePatch[]): Promise<void> => {
 
   const rows = requests.map((r, idx) => {
     const elide = g.plain ? undefined : 80;
-    return [idx + 1, formatUtil.statusMessage(r), formatUtil.methurl(r, elide), colorUtil.dim(r.parentId)];
+    return [idx + 1, formatUtil.statusMessage(r), r.key, formatUtil.methurl(r, elide), colorUtil.dim(r.parentId)];
   });
 
   table.push(...rows);

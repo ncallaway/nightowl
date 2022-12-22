@@ -1,12 +1,12 @@
 import { colorUtil } from "./colorUtil";
 import { ResponsePatch } from "../../../core/insomniaTypes";
 
-const statusMessage = (r: ResponsePatch) => {
+const statusMessage = (r: ResponsePatch): string => {
   const message = [r.statusCode, r.statusMessage].filter((x) => x).join(" ");
   return colorUtil.chalkStatus(r.statusCode, message);
 };
 
-const methurl = (r: ResponsePatch, elide: number | undefined = undefined) => {
+const methurl = (r: ResponsePatch, elide: number | undefined = undefined): string => {
   const method = colorUtil.chalkMethod(r.method, r.method);
 
   const elidedUrl = elide ? elideMiddle(r.url, elide) : r.url;

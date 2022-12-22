@@ -1,15 +1,22 @@
 ### Next Features
 
+- [ ] UX necessities:
+
+  - [x] add init command
+  - [ ] all other commands detect no '.owl' directory and print a warning
+    - started, done with commands that useStore
+    - need to add ensureStore to other commands
+  - [x] help command
+  - [x] unrecognized command output
+  - [x] version information
+  - [ ] add import from curl
+
+- [ ] warnings zero
+- [ ] Add integration tests to pre-push hook
 - [ ] Print curl command
 - [ ] History commands
 
-- [ ] UX necessities:
 
-  - [ ] add init command
-  - [ ] all other commands detect no '.owl' directory and print a warning
-  - [ ] help command
-  - [ ] help for when command isn't known
-  - [ ] add import from curl
 
 - [ ] Start basic documentation
 
