@@ -11,22 +11,29 @@ const chalkMethod = (method: string, message: string = method): string => {
   const lowerMethod = method.toLowerCase();
 
   if (lowerMethod == "get") {
-    return chalk.blue(message);
+    return chalk.blue(message.toUpperCase());
   }
 
   if (lowerMethod == "post") {
-    return chalk.green(message);
+    return chalk.green(message.toUpperCase());
   }
 
   if (lowerMethod == "delete") {
-    return chalk.red(message);
+    return chalk.red(message.toUpperCase());
   }
 
   return message;
 };
 
 const chalkStatus = (statusCode: number | undefined, message: string | undefined = String(statusCode)): string => {
-  if (!statusCode || !g.color) {
+  if (!g.color) {
+    return (statusCode as unknown as string) || message
+  }
+
+  if (!statusCode) {
+    if (message == "Error") {
+      return chalk.red(message);
+    }
     return message;
   }
 
@@ -42,6 +49,11 @@ const chalkStatus = (statusCode: number | undefined, message: string | undefined
   if (statusCode >= 400) {
     return chalk.red(statusCode);
   }
+
+  if ("" + statusCode == "Error") {
+    return chalk.red(statusCode);
+  }
+
   return "" + statusCode;
 };
 

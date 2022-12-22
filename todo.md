@@ -6,10 +6,9 @@
   - [ ] all other commands detect no '.owl' directory and print a warning
     - started, done with commands that useStore
     - need to add ensureStore to other commands
-  - [ ] help command
-  - [ ] unrecognized command output
-  - [ ] version information
-  - [ ] help for when command isn't known
+  - [x] help command
+  - [x] unrecognized command output
+  - [x] version information
   - [ ] add import from curl
 
 - [ ] warnings zero
