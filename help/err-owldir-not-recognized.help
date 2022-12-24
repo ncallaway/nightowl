@@ -1,0 +1,7 @@
+The owl directory existed, but the structure of the contents of the directory was not recognized. The owl directory is expected to exist as a directory named `.owl/` in the current directory. The owl directory structure is expected to contain
+
+.owl/
+  .config       # json file
+  .env/
+    .config     # json file
+  # all request files

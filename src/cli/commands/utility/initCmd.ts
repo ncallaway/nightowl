@@ -4,8 +4,7 @@ import { Command } from "../command";
 
 const initializeOwl = async (): Promise<void> => {
   // check if directory exists, and bail if the directory exists
-  const res = await store.initializeStore();
-  unwrap(res);
+  await unwrap(store.initializeStore());
 }
 
 export const InitCommand: Command = {

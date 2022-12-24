@@ -28,5 +28,16 @@ export const owlpaths = {
 
   databasePath: (key: string): string => path.join(globalDataDir(), `${key}-store.db`),
 
+  requestPath: (key: string): string => {
+    const components = key.split("/");
+    components[components.length - 1] = `${components[components.length - 1]}.json`;
+    return path.join(workspaceDir(), ...components);
+  },
+
+  requestGroupPath: (key: string): string => {
+    const components = key.split("/");
+    return path.join(workspaceDir(), ...components);
+  },
+
   isValidUserPathComponent,
 };

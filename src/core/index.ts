@@ -1,4 +1,4 @@
-export type { RequestDefinition } from "./insomniaTypes";
+export { RequestDefinition } from "./schemas/requestSchema";
 export type { SavedEnvironment, RenderedEnvironment, EnvironmentPrivateDefinition } from "./env/env";
 
 export { env } from "./env/envPublic";
@@ -8,4 +8,5 @@ export { history } from "./history/historyPublic";
 export { store } from "./store/store";
 
 export * as constants from "./constants";
+
 

@@ -1,0 +1,6 @@
+The owl directory was not found. The owl directory is expected to exist as a directory named `.owl/` in the current directory.
+
+This may happen because:
+  - You haven't run `owl init`
+  - You aren't in the same directory as when you ran `owl init`
+  - You don't have permissions to view the `.owl/` directory

@@ -2,6 +2,7 @@
 
 import { Temporal } from "@js-temporal/polyfill";
 import { CookieJar } from "tough-cookie";
+import { Json } from "./schemas/jsonSchema";
 
 export type RequestAuthentication = Record<string, any>;
 
@@ -38,7 +39,7 @@ export interface RequestBody {
   params?: RequestBodyParameter[];
 
   // nightowl additions
-  json?: Record<string, unknown>;
+  json?: Json;
 }
 
 export interface RequestPrompts {
@@ -46,7 +47,7 @@ export interface RequestPrompts {
   description?: string;
 }
 
-export interface RequestDefinition {
+export interface InternalRequestDefinition {
   _key: string;
   url: string;
   description: string;
@@ -69,7 +70,7 @@ export interface RequestDefinition {
   prompts: RequestPrompts[];
 }
 
-export type RenderedRequest = RequestDefinition & {
+export type RenderedRequest = InternalRequestDefinition & {
   _id: string;
   cookies: {
     name: string;

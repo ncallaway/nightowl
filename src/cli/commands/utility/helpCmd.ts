@@ -1,8 +1,43 @@
+import { CommandLineOptions } from "command-line-args";
+import path from "path";
+import fs from "fs";
+import { OwlErrorKey } from "../../../core/errors";
+import { Errors } from "../../lib/errors";
 import { Command } from "../command";
 
-const printHelp = async (): Promise<void> => {
-  console.log(`\nUsage: owl [global options] COMMAND [command options]`);
-  console.log(`\nNight Owl`);
+const run = async (args: CommandLineOptions): Promise<void> => {
+  console.log();
+
+  const cmd = args._unknown?.shift();
+  if (cmd && Errors[cmd as OwlErrorKey]) {
+    printErrorHelp(cmd as OwlErrorKey);
+    return;
+  }
+
+  printHelp();
+}
+
+const printErrorHelp = (key: OwlErrorKey) => {
+  printHelpFile(key, () => { console.log(`No help file exists for ${key}.`) })
+}
+
+export const hasHelpFile = (file: string): boolean => {
+  const helpPath = path.join(__dirname, "..", "..", "..", "..", "help", `${file}.help`);
+  return fs.existsSync(helpPath);
+}
+
+const printHelpFile = (file: string, onError?: () => void) => {
+  const helpPath = path.join(__dirname, "..", "..", "..", "..", "help", `${file}.help`);
+  try {
+    const file = fs.readFileSync(helpPath, "utf-8");
+    console.log(file);
+  } catch (error) {
+    onError?.();
+  }
+}
+
+const printHelp = () => {
+  printHelpFile("usage");
 
   console.log(`\nGlobal Options:`);
   // todo: define these help strings with the global args
@@ -25,5 +60,6 @@ const printHelp = async (): Promise<void> => {
 
 export const HelpCommand: Command = {
   name: "help",
-  run: printHelp
+  options: [],
+  run
 }

@@ -82,7 +82,8 @@ owl import postman [infile]
 # creating requests
 owl create patients/list "http://localhost:3000/patients" --param q="john" --method get --header accept=application/json
 owl show patients
-owl from curl patients/list -- curl http://localhost:3000/patients?q=john -H 'Authorization: Bearer token'
+# owl from curl patients/list -- curl http://localhost:3000/patients?q=john -H 'Authorization: Bearer token'
+[x] owl create patients/list -- curl http://localhost:3000/patients?q=john -H 'Authorization: Bearer token'
 owl update patients/list --url "{env.host}/patients" --rm-param q --param "jwt={state.jwt}"
 
 owl rm patients/list
@@ -168,6 +169,7 @@ owl state unset-cookie test:1 response
 [x] owl --version
 [x] owl help
 [x] owl --help
+[x] owl help [error-code]
 [x] owl # shows help info
 ```
 

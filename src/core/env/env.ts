@@ -1,13 +1,14 @@
 import _ from "lodash";
 import { err, ok, Result } from "neverthrow";
+import { OwlError } from "../errors";
+import { envPrivates } from "../lib/envPrivates";
 import { files } from "../lib/files";
 import { owlpaths } from "../lib/owlpaths";
+import { userstore } from "../lib/userstore";
+import { UnknownObject } from "../types";
+import { get, getPrivateKeys } from "./envGet";
 import { isValidEnvironmentName } from "./envIsValidEnvironmentName";
 import { listSummary, summaryFor } from "./envListSummary";
-import { get, getPrivateKeys } from "./envGet";
-import { userstore } from "../lib/userstore";
-import { envPrivates } from "../lib/envPrivates";
-import { UnknownObject } from "../types";
 
 export type RenderedEnvironment = Record<string, unknown>;
 export type EnvironmentPrivateDefinition = {
@@ -24,12 +25,12 @@ export type Prompt = {
   description?: string;
 };
 
-const getPrompts = async (env: string): Promise<Result<Prompt[], string>> => {
+const getPrompts = async (env: string): Promise<Result<Prompt[], OwlError>> => {
   const envPath = await owlpaths.envPath(env);
 
-  const resEnvRaw = await files.readJson(envPath);
+  const resEnvRaw = await files.readJson(envPath, undefined, {});
   if (resEnvRaw.isErr()) {
-    return err(resEnvRaw.error);
+    return err({error: 'err-reading-env', detail: resEnvRaw.error.detail, identifier: envPath});
   }
   const envRaw = resEnvRaw.value as any;
 
@@ -42,33 +43,32 @@ const getPrompts = async (env: string): Promise<Result<Prompt[], string>> => {
   return ok(unsavedPrivates);
 };
 
-const setDefault = async (env: string): Promise<Result<undefined, string>> => {
+const setDefault = async (env: string): Promise<Result<undefined, OwlError>> => {
   if (!(await exists(env))) {
-    // write to config...
-    return err("The provided environment doesn't exist");
+    return err({error: 'err-env-not-found'});
   }
 
   // read config file
-  const resJson = await files.readJson(owlpaths.envConfigPath());
-
+  const resJson = await files.readJson(owlpaths.envConfigPath(), undefined, {});
   if (resJson.isErr()) {
-    return err(resJson.error);
+    return err({ ...resJson.error, error: "err-reading-env-config"});
   }
 
   const config = resJson.value as any;
   config.default = env;
 
+  // write to config...
   const resWrite = await files.writeJson(owlpaths.envConfigPath(), config);
   if (resWrite.isErr()) {
-    return err(resWrite.error);
+    return err({ error: "err-writing-env-config", detail: resWrite.error});
   }
 
   return ok(undefined);
 };
 
-const getDefault = async (): Promise<Result<string, string>> => {
+const getDefault = async (): Promise<Result<string, OwlError>> => {
   // get the configured default
-  const resConfig = await files.readJson(owlpaths.envConfigPath());
+  const resConfig = await files.readJson(owlpaths.envConfigPath(), undefined, {});
   if (resConfig.isOk()) {
     const config = resConfig.value as any;
     if (config.default && (await exists(config.default))) {
@@ -84,10 +84,10 @@ const getDefault = async (): Promise<Result<string, string>> => {
   }
 
   // no default is available
-  return err("No default environment exists");
+  return err({error: 'err-no-default-env'});
 };
 
-const getActive = async (): Promise<Result<string, string>> => {
+const getActive = async (): Promise<Result<string, OwlError>> => {
   if (process.env.OWL_ENV && (await exists(process.env.OWL_ENV))) {
     return ok(process.env.OWL_ENV);
   }
@@ -105,9 +105,9 @@ const exists = async (env: string): Promise<boolean> => {
   return Boolean(all.find((e) => e.name.toLowerCase() == env.toLowerCase()));
 };
 
-const del = async (env: string): Promise<Result<undefined, string>> => {
+const del = async (env: string): Promise<Result<undefined, OwlError>> => {
   if (!(await exists(env))) {
-    return err(`the environment does not exist: ${env}`);
+    return err({error: 'err-env-not-found', identifier: env});
   }
 
   const envPath = await owlpaths.envPath(env);
@@ -115,16 +115,16 @@ const del = async (env: string): Promise<Result<undefined, string>> => {
   // is default?
   // is last?
 
-  return files.delete(envPath);
+  return (await files.delete(envPath)).mapErr(() => ({ error: "err-writing-env", envPath}));
 };
 
-const rename = async (oldEnv: string, newEnv: string): Promise<Result<undefined, string>> => {
+const rename = async (oldEnv: string, newEnv: string): Promise<Result<undefined, OwlError>> => {
   if (!(await exists(oldEnv))) {
-    return err(`the environment does not exist: ${oldEnv}`);
+    return err({error: 'err-env-not-found', identifier: oldEnv});
   }
 
   if (await exists(newEnv)) {
-    return err(`an environment already exists: ${newEnv}`);
+    return err({error: 'err-env-already-exists', identifier: newEnv});
   }
 
   const resDefault = await getDefault();
@@ -138,7 +138,7 @@ const rename = async (oldEnv: string, newEnv: string): Promise<Result<undefined,
 
   const resFiles = await files.move(oldEnvPath, newEnvPath);
   if (resFiles.isErr()) {
-    return err(resFiles.error);
+    return err({error: 'err-writing-env', detail: resFiles.error, identifier: newEnvPath});
   }
 
   if (wasDefault) {
@@ -147,13 +147,13 @@ const rename = async (oldEnv: string, newEnv: string): Promise<Result<undefined,
   return ok(undefined);
 };
 
-const create = async (env: string): Promise<Result<undefined, string>> => {
+const create = async (env: string): Promise<Result<undefined, OwlError>> => {
   if (!isValidEnvironmentName(env)) {
-    return err(`the environment name was not valid: ${env}`);
+    return err({ error: "err-invalid-env-name", identifier: env});
   }
 
   if (await exists(env)) {
-    return err(`the environment already exists: ${env}`);
+    return err({error: 'err-env-already-exists', identifier: env});
   }
 
   // is this the first env? If so we should automatically make it the default
@@ -163,9 +163,8 @@ const create = async (env: string): Promise<Result<undefined, string>> => {
   const envPath = await owlpaths.envPath(env);
 
   const writeRes = await files.writeJson(envPath, {});
-
   if (writeRes.isErr()) {
-    return err(writeRes.error);
+    return err({error: 'err-writing-env', detail: writeRes.error, identifier: envPath});
   }
 
   if (noEnviroments) {
@@ -180,9 +179,9 @@ const update = async (
   values: UnknownObject,
   privates: UnknownObject,
   merge = false
-): Promise<Result<undefined, string>> => {
+): Promise<Result<undefined, OwlError>> => {
   if (!(await exists(env))) {
-    return err(`the environment does not exist: ${env}`);
+    return err({error: 'err-env-not-found', identifier: env});
   }
 
   // let baseValues = {};
@@ -196,9 +195,9 @@ const update = async (
 
   if (merge) {
     const envPath = await owlpaths.envPath(env);
-    const resEnvRaw = await files.readJson(envPath);
+    const resEnvRaw = await files.readJson(envPath, undefined, {});
     if (resEnvRaw.isErr()) {
-      return err(resEnvRaw.error);
+      return err({ ...resEnvRaw.error, error: 'err-reading-env', identifier: envPath});
     }
     base = resEnvRaw.value as SavedEnvironment;
     privateDefinitions = base.private;
@@ -234,11 +233,12 @@ const update = async (
 
   await userstore.saveEnvPrivateValues(env, savedPrivateValues);
 
-  const envPath = await owlpaths.envPath(env);
-  return files.writeJson(envPath, updated, { pretty: true });
+  const envPath = owlpaths.envPath(env);
+  const resWrite = await files.writeJson(envPath, updated, { pretty: true });
+  return resWrite.mapErr(error => ({ error: "err-writing-env", detail: error, identifier: envPath }));
 };
 
-const envOrDefault = async (env: string | undefined): Promise<Result<string, string>> => {
+const envOrDefault = async (env: string | undefined): Promise<Result<string, OwlError>> => {
   if (env) {
     return ok(env);
   }

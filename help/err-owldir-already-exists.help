@@ -1,0 +1,5 @@
+You attempted to run `owl init`, but the owl directory already existed.
+
+This may happen because:
+  - You ran `owl init` multiple times
+  - You already have an unrelated directory named `.owl/` in the current directory when you ran `owl init`

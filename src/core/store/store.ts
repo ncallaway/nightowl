@@ -13,7 +13,7 @@ const inspectStore = async (): Promise<Result<undefined, OwlError>> => {
     const dir = await fs.opendir(owlpaths.workspaceDir());
     await dir.close();
   } catch (error) {
-    return err({ error: "err-store-not-found" });
+    return err({ error: "err-owldir-not-found" });
   }
 
   // ensure that the .owl/.config file exists
@@ -21,7 +21,7 @@ const inspectStore = async (): Promise<Result<undefined, OwlError>> => {
     const config = await fs.open(owlpaths.workspaceConfigPath(), 'r');
     await config.close();
   } catch (error) {
-    return err({ error: "err-store-not-recognized", detail: ".config file was not found or could not be read." });
+    return err({ error: "err-owldir-not-recognized", detail: ".config file was not found or could not be read." });
   }
 
   // ensure that the .owl/.env/.config file exists
@@ -29,7 +29,7 @@ const inspectStore = async (): Promise<Result<undefined, OwlError>> => {
     const envConfig = await fs.open(owlpaths.envConfigPath(), 'r');
     await envConfig.close();
   } catch (error) {
-    return err({ error: "err-store-not-recognized", detail: ".env/.config file was not found or could not be read." });
+    return err({ error: "err-owldir-not-recognized", detail: ".env/.config file was not found or could not be read." });
   }
 
   return ok(undefined);
@@ -39,30 +39,30 @@ const initializeStore = async (): Promise<Result<undefined, OwlError>> => {
   try {
     await fs.mkdir(owlpaths.workspaceDir(), { recursive: false })
   } catch (error) {
-    return err({ error: "err-store-already-exists" });
+    return err({ error: "err-owldir-already-exists" });
   }
 
   try {
     await fs.mkdir(owlpaths.envDir(), { recursive: true })
   } catch (error) {
-    return err({ error: "err-store-initialization", detail: error as Error });
+    return err({ error: "err-writing-owldir", detail: error as Error });
   }
 
   const key = randomUUID();
   const fileRes = await files.writeJson(owlpaths.workspaceConfigPath(), { key }, { pretty: true });
   if (fileRes.isErr()) {
-    return err({ error: "err-store-initialization", detail: `error while writing ${owlpaths.workspaceConfigPath()}: ${fileRes.error}` });
+    return err({ error: "err-writing-owldir", detail: `error while writing ${owlpaths.workspaceConfigPath()}: ${fileRes.error}` });
   }
 
 
   const envRes = await files.writeJson(owlpaths.envConfigPath(), { default: "local" }, { pretty: true });
   if (envRes.isErr()) {
-    return err({ error: "err-store-initialization", detail: `error while writing ${owlpaths.envConfigPath()}: ${envRes.error}` });
+    return err({ error: "err-writing-owldir", detail: `error while writing ${owlpaths.envConfigPath()}: ${envRes.error}` });
   }
 
   const localEnvRes = await files.writeJson(owlpaths.envPath("local"), { values: {}, private: [] }, { pretty: true });
   if (localEnvRes.isErr()) {
-    return err({ error: "err-store-initialization", detail: `error while writing ${owlpaths.envPath("local")}: ${localEnvRes.error}` });
+    return err({ error: "err-writing-owldir", detail: `error while writing ${owlpaths.envPath("local")}: ${localEnvRes.error}` });
   }
 
   return ok(undefined);
@@ -70,9 +70,9 @@ const initializeStore = async (): Promise<Result<undefined, OwlError>> => {
 
 const openStore = async (): Promise<Result<OwlStore, OwlError>> => {
   // load the workspace config...
-  const resWsConfig = await files.readJson(owlpaths.workspaceConfigPath());
+  const resWsConfig = await files.readJson(owlpaths.workspaceConfigPath(), undefined, {});
   if (resWsConfig.isErr()) {
-    return err({error: "err-store-not-recognized", detail: resWsConfig.error } );
+    return err({...resWsConfig.error, error: "err-owldir-not-recognized"} );
   }
   const wsConfig = resWsConfig.value as any;
   const key = wsConfig.key;

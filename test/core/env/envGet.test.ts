@@ -19,10 +19,23 @@ describe("env", () => {
     });
 
     it("should return an error if the env doesn't exist", async () => {
-      mockReadJson.mockImplementation(() => Promise.resolve(err("file not found")));
+      mockReadJson.mockImplementation(() => Promise.resolve(err({error: 'file-not-found'})));
 
       const res = await env.get("qa");
-      expect(res).toEqual(err("file not found"));
+      expect(res.isErr()).toEqual(true);
+      if (res.isErr()) {
+        expect(res.error.error).toEqual("err-env-not-found")
+      }
+    });
+
+    it("should return an error if the env is invalid", async () => {
+      mockReadJson.mockImplementation(() => Promise.resolve(err({error: 'json-parse-error'})));
+
+      const res = await env.get("qa");
+      expect(res.isErr()).toEqual(true);
+      if (res.isErr()) {
+        expect(res.error.error).toEqual("err-reading-env")
+      }
     });
   });
 });

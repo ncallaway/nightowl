@@ -1,17 +1,19 @@
 import _ from "lodash";
 import { err, ok, Result } from "neverthrow";
 import { EnvironmentPrivateDefinition, RenderedEnvironment } from "..";
+import { OwlError } from "../errors";
 import { files } from "../lib/files";
 import { owlpaths } from "../lib/owlpaths";
 import { userstore } from "../lib/userstore";
 import { SavedEnvironment } from "./env";
 
-export const get = async (env: string, prompts: any = {}): Promise<Result<RenderedEnvironment, string>> => {
+export const get = async (env: string, prompts: any = {}): Promise<Result<RenderedEnvironment, OwlError>> => {
   const envPath = await owlpaths.envPath(env);
 
-  const resEnvRaw = await files.readJson(envPath);
+  const resEnvRaw = (await files.readJson(envPath, undefined, {}));
   if (resEnvRaw.isErr()) {
-    return err(resEnvRaw.error);
+    const error = resEnvRaw.error;
+    return err({error: error.error == "file-not-found" ? 'err-env-not-found' : 'err-reading-env', detail: error.detail, identifier: error.identifier} as OwlError)
   }
   const envRaw = resEnvRaw.value as any;
 
@@ -41,9 +43,9 @@ export const get = async (env: string, prompts: any = {}): Promise<Result<Render
 export const getPrivateKeys = async (env: string): Promise<Result<EnvironmentPrivateDefinition[], string>> => {
   const envPath = await owlpaths.envPath(env);
 
-  const resEnvRaw = await files.readJson(envPath);
+  const resEnvRaw = await files.readJson(envPath, undefined, {});
   if (resEnvRaw.isErr()) {
-    return err(resEnvRaw.error);
+    return err("" + resEnvRaw.error.detail);
   }
   const envRaw = resEnvRaw.value as SavedEnvironment;
   return ok(envRaw.private);

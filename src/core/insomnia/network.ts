@@ -7,8 +7,7 @@ import mkdirp from "mkdirp";
 import { Curl, CurlAuth, CurlCode, CurlFeature, CurlHttpVersion, CurlInfoDebug, CurlNetrc } from "node-libcurl";
 import { join as pathJoin } from "path";
 import tls from "tls";
-import { RequestDefinition } from "..";
-import { RenderedRequest, ResponseHeader, ResponsePatch, ResponseTimelineEntry } from "../insomniaTypes";
+import { InternalRequestDefinition, RenderedRequest, ResponseHeader, ResponsePatch, ResponseTimelineEntry } from "../insomniaTypes";
 import {
   getContentTypeHeader,
   getLocationHeader,
@@ -968,7 +967,7 @@ const performRequest = (renderedRequest: RenderedRequest, validateSSL = true): P
   });
 };
 
-const curlOptFollowLocation = (definition: RequestDefinition): boolean => {
+const curlOptFollowLocation = (definition: InternalRequestDefinition): boolean => {
   switch (definition.settingFollowRedirects) {
     case "off":
       return false;
@@ -982,7 +981,7 @@ const curlOptFollowLocation = (definition: RequestDefinition): boolean => {
   }
 };
 
-const curlOptMethod = (definition: RequestDefinition) => {
+const curlOptMethod = (definition: InternalRequestDefinition) => {
   // Only set CURLOPT_CUSTOMREQUEST if not HEAD or GET. This is because Curl
   // See https://curl.haxx.se/libcurl/c/CURLOPT_CUSTOMREQUEST.html
   switch (definition.method.toUpperCase()) {

@@ -1,6 +1,7 @@
 import chalk from "chalk";
 import { Result } from "neverthrow";
 import { env } from "../../../core";
+import { OwlError } from "../../../core/errors";
 import { storeUtil } from "../../lib/storeUtil";
 import { Command } from "../command";
 
@@ -9,7 +10,7 @@ export const outputEnvironmentList = async (): Promise<void> => {
 
   const envs = await env.listSummary();
 
-  const resDef: Result<string | null, string> = await env.getDefault();
+  const resDef: Result<string | null, OwlError> = await env.getDefault();
   const def = resDef.unwrapOr(null);
 
   for (const env of envs) {

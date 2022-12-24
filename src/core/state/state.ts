@@ -1,6 +1,7 @@
 import _ from "lodash";
 import { err, ok, Result } from "neverthrow";
 import { envLib as envLib } from "../env/env";
+import { OwlError } from "../errors";
 import { dbstore } from "../store/dbstore";
 import { OwlStore, State, StateSummary, UnknownObject } from "../types";
 
@@ -26,7 +27,7 @@ const loadStates = async (env: string, store: OwlStore) => {
   return states.sort((a, b) => a.name.localeCompare(b.name));
 };
 
-const listSummary = async (env: string | undefined, store: OwlStore): Promise<Result<StateSummary[], string>> => {
+const listSummary = async (env: string | undefined, store: OwlStore): Promise<Result<StateSummary[], OwlError>> => {
   if (!env) {
     const resEnvStr = await envLib.getActive();
     if (resEnvStr.isErr()) {
@@ -45,10 +46,10 @@ const listSummary = async (env: string | undefined, store: OwlStore): Promise<Re
   return ok(summaries);
 };
 
-const stateOrDefault = (state: string | undefined): Result<string, string> => {
+const stateOrDefault = (state: string | undefined): Result<string, OwlError> => {
   if (state) {
     if (!isValidStateName(state)) {
-      return err(`${state} is not a valid state name`);
+      return err({ error: 'err-invalid-state-name', identifier: state});
     }
     return ok(state);
   }
@@ -60,7 +61,7 @@ const get = async (
   state: string | undefined,
   env: string | undefined,
   store: OwlStore
-): Promise<Result<State, string>> => {
+): Promise<Result<State, OwlError>> => {
   const resState = stateOrDefault(state);
   if (resState.isErr()) {
     return err(resState.error);
@@ -86,7 +87,7 @@ const clear = async (
   state: string | undefined,
   env: string | undefined,
   store: OwlStore
-): Promise<Result<null, string>> => {
+): Promise<Result<null, OwlError>> => {
   const resState = stateOrDefault(state);
   if (resState.isErr()) {
     return err(resState.error);
@@ -109,7 +110,7 @@ const update = async (
   values: UnknownObject,
   store: OwlStore,
   merge = false
-): Promise<Result<State, string>> => {
+): Promise<Result<State, OwlError>> => {
   const resState = stateOrDefault(state);
   if (resState.isErr()) {
     return err(resState.error);
@@ -155,7 +156,7 @@ const move = async (
   env: string | undefined,
   toEnv: string | undefined,
   store: OwlStore
-): Promise<Result<null, string>> => {
+): Promise<Result<null, OwlError>> => {
   const resState = stateOrDefault(state);
   if (resState.isErr()) {
     return err(resState.error);
@@ -188,7 +189,7 @@ const copy = async (
   env: string | undefined,
   toEnv: string | undefined,
   store: OwlStore
-): Promise<Result<null, string>> => {
+): Promise<Result<null, OwlError>> => {
   const resState = stateOrDefault(state);
   if (resState.isErr()) {
     return err(resState.error);

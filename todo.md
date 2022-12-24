@@ -9,7 +9,9 @@
   - [x] help command
   - [x] unrecognized command output
   - [x] version information
-  - [ ] add import from curl
+  - [x] add import from curl
+  - [ ] help for specific command
+  - [x] help for error messages
 
 - [x] warnings zero
 - [x] Add integration tests to pre-push hook
@@ -19,19 +21,27 @@
     - owl list
     - owl list [prefix]
     - owl list --all
-  - [ ] owl remove [request-key]
-  - [ ] owl from curl [request-key] -- [curl]
-  - [ ] owl create
-  - [ ] owl update
-  - [ ] owl details [request-key]
+  - [ ] owl remove <request-key>
+  - [ ] owl create <request-key> [args]
+  - [x] owl create <request-key> -- [curl]
+    - fork importers and allow calling with
+    - live importers in https://github.com/Kong/insomnia/blob/5b2707cb760b901ea1f77067cc0ba92e81fb3644/packages/insomnia/src/utils/importers/importers/curl.ts
+    -- import in insomnia is in packages/insomnia-app/app/ui/components/wrapper.tsx
+      - _handleImport
+  - [ ] owl update <request-key> [args]
+  - [ ] owl details <request-key>
+  - [ ] owl move <request-key> <request-key>
 
 - [ ] Print curl command
 - [ ] History commands
 
+- [ ] Schema validation for `env`
+  - probably need to make common `reader` helpers, since we read these files in a number of places
 
 
 - [ ] Start basic documentation
   - [ ] Command help documentation
+  - [x] Error help documentation
   - [ ] Draft basic getting started information
 
 - [x] move prompts into `core`

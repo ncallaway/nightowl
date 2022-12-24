@@ -1,20 +1,63 @@
-export type OwlErrorKey =
-  // indicates that the .owl directory (or whatever directory is configured as the store) could
-  // not be found on disk
-  'err-store-not-found'
+export type InternalErrorKey =
+    'file-not-found'
+  | 'file-empty'
+  | 'json-parse-error'
+  | 'schema-validation-error'
+  ;
 
-  // indicates that the .owl directory was found on disk, but the structure of the folder was not
+export type InternalError = {
+    error: InternalErrorKey;
+    detail?: string | Error;
+    identifier?: string;
+  }
+
+export type OwlErrorKey =
+  // indicates that the owl directory could not be found on disk
+  'err-owldir-not-found'
+
+  // indicates that the owl directory was found on disk, but the structure of the folder was not
   // recognized (e.g. it was a file instead of a directory, or the directory did not have the
   // expected structure (.config, .env/.config, etc).
-  | 'err-store-not-recognized'
+  | 'err-owldir-not-recognized'
 
   // indiciates that the store already exists when the user attempted to initialize it.
-  | 'err-store-already-exists'
+  | 'err-owldir-already-exists'
 
-  // an unknown error occurred while the store was being initialized
-  | 'err-store-initialization';
+  // an unknown error occurred while the writing to the owl directory
+  | 'err-writing-owldir'
+
+  // indicates the request definition was invalid in some way
+  | 'err-invalid-request-definition'
+
+  // indicates that we tried to create a request definition that already exists
+  | 'err-request-def-already-exists'
+  | 'err-request-group-already-exists'
+
+  // indicates an error occurred while writing the request definition to
+  // disk
+  | 'err-writing-request-definition'
+
+  // the given import string was not recognized, and could not be imported
+  | 'err-unrecognized-request-import'
+
+  // environment
+  | 'err-env-not-found'
+  | 'err-env-already-exists'
+  | 'err-reading-env'
+  | 'err-writing-env'
+  | 'err-invalid-env-name' // the environment name provided did not meet our rules
+  | 'err-no-default-env' // there are 0 environments, so no default exists
+
+  // env config
+  | 'err-writing-env-config'
+  | 'err-reading-env-config'
+
+  // state
+  | 'err-invalid-state-name' // the state name did not meet our rules
+  ;
 
 export type OwlError = {
   error: OwlErrorKey;
   detail?: string | Error;
+  identifier?: string;
 }

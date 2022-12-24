@@ -2,17 +2,17 @@ import _ from "lodash";
 import nunjucks from "nunjucks";
 import { CookieJar } from "tough-cookie";
 import { v4 as genuuid } from "uuid";
-import { RenderedEnvironment, RequestDefinition } from "..";
-import { RenderedRequest } from "../insomniaTypes";
+import { RenderedEnvironment } from "..";
+import { InternalRequestDefinition, RenderedRequest } from "../insomniaTypes";
 import { State } from "../types";
 
 const render = async (
-  definition: RequestDefinition,
+  definition: InternalRequestDefinition,
   env: RenderedEnvironment,
   state: State,
   prompts: Record<string, unknown> = {}
 ): Promise<RenderedRequest> => {
-  const cloned: RequestDefinition = _.cloneDeep(definition);
+  const cloned: InternalRequestDefinition = _.cloneDeep(definition);
   cloned.url = template(definition.url, env, state, prompts);
   if (cloned.body.text) {
     cloned.body.text = template(cloned.body.text, env, state, prompts);

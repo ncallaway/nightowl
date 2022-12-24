@@ -65,10 +65,11 @@ export const main = async (): Promise<void> => {
       console.error("An unexpected error occurred: ", err);
     }
   } else {
-    // trap for version and help
+    // trap help
     try {
       /* eslint-disable @typescript-eslint/no-extra-non-null-assertion, @typescript-eslint/no-non-null-assertion */
-      await HelpCommand.run!!({ cmd });
+      const helpArgs = commandLineArgs([], { argv: [], stopAtFirstUnknown: true });
+      await HelpCommand.run!!(helpArgs);
       /* eslint-enable @typescript-eslint/no-extra-non-null-assertion, @typescript-eslint/no-non-null-assertion */
     } catch (err) {
       console.error("An unexpected error occurred: ", err);

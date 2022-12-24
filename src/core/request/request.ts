@@ -1,20 +1,26 @@
-import { readFile } from "fs/promises";
+import fs from 'fs/promises';
 import { err, ok, Result } from "neverthrow";
-import path from "path";
-import { Prompt, envLib as envLib } from "../env/env";
+import { envLib, Prompt } from "../env/env";
+import { OwlError } from "../errors";
 import { Network } from "../insomnia/network";
-import type { RenderedRequest, RequestDefinition, ResponsePatch } from "../insomniaTypes";
+import type { InternalRequestDefinition, RenderedRequest, ResponsePatch } from "../insomniaTypes";
+import { files } from "../lib/files";
+import { owlpaths } from "../lib/owlpaths";
 import { requestRender } from "../lib/requestRender";
+import { RequestDefinition, requestDefinitionSchema } from "../schemas/requestSchema";
+import { SerializedRequestDefinition, serializedRequestDefinitionSchema } from "../schemas/serializedRequestSchema";
+import { zodUtil } from "../schemas/zodUtil";
 import { stateLib } from "../state/state";
 import { dbstore } from "../store/dbstore";
 import { OwlStore, UnknownObject } from "../types";
+import { convert } from "./requestConvert";
 
 type RequestPrompts = {
   environment: Prompt[];
   request: Prompt[];
 };
 
-const getPrompts = async (request: string, env?: string): Promise<Result<RequestPrompts, string>> => {
+const getPrompts = async (request: string, env?: string): Promise<Result<RequestPrompts, OwlError>> => {
   const resEnv = await envLib.envOrDefault(env);
   if (resEnv.isErr()) {
     return err(resEnv.error);
@@ -48,7 +54,7 @@ const runRequest = async (
   envPrompts: Record<string, unknown>,
   reqPrompts: Record<string, unknown>,
   store: OwlStore
-): Promise<Result<ResponsePatch, string>> => {
+): Promise<Result<ResponsePatch, OwlError>> => {
   const resState = stateLib.stateOrDefault(state);
   if (resState.isErr()) {
     return err(resState.error);
@@ -92,24 +98,85 @@ const runRequest = async (
   return ok(requestResult);
 };
 
+const exists = async (request: string): Promise<boolean> => {
+  const path = owlpaths.requestPath(request);
+  try {
+    const stat = await fs.stat(path);
+    return stat.isFile();
+  } catch (err) {
+    return false;
+  }
+}
+
+const requestGroupExists = async (request: string): Promise<boolean> => {
+  const path = owlpaths.requestGroupPath(request);
+  try {
+    const stat = await fs.stat(path);
+    return stat.isDirectory();
+  } catch (err) {
+    return false;
+  }
+}
+
+const create = async (request: string, definition: RequestDefinition): Promise<Result<undefined, OwlError>> => {
+  // validate the serialized request
+  const sresDefinition = requestDefinitionSchema.safeParse(definition);
+  if (!sresDefinition.success) {
+    return err({ error: "err-invalid-request-definition", detail: zodUtil.joinErrors(sresDefinition.error)});
+  }
+  definition = sresDefinition.data;
+
+  // ensure a request group doesn't already exist
+  if (await requestGroupExists(request)) {
+    return err({ error: 'err-request-group-already-exists', identifier: request });
+  }
+
+  const parentComponents = request.split("/").slice(0, -1);
+  const parentPath = parentComponents.join("/");
+
+  // first check that this is a valid request key
+    // - all parents either don't exist or are already directories
+  for (let idx = 0; idx < parentComponents.length; idx++) {
+    const groupPath = parentComponents.slice(0, idx + 1).join("/");
+    if (await exists(groupPath)) {
+      return err({ error: 'err-request-def-already-exists', identifier: groupPath });
+    }
+  }
+
+  // construct any necessary missing directories
+  if (parentPath) {
+    await fs.mkdir(owlpaths.requestGroupPath(parentPath), { recursive: true });
+  }
+
+  // write the json for the request
+  const path = owlpaths.requestPath(request);
+  const res = await files.writeJson(path, definition, { pretty: true, flag: "wx" });
+  return res.mapErr(e => {
+    if ((e as any).code == "EEXIST") {
+      return {error: "err-request-def-already-exists", detail: e}
+    }
+    return {error: "err-writing-request-definition", detail: e}
+  });
+}
+
 export const request = {
+  convert,
+  create,
   getPrompts,
+  exists,
   runRequest,
 };
 
 const issueRequest = (rendered: RenderedRequest): Promise<ResponsePatch> => Network.performRequest(rendered);
 
-const loadRequest = async (request: string): Promise<Result<RequestDefinition, string>> => {
-  const req = `${request}.json`;
-  const requestPath = path.join(".owl", req);
+const loadRequest = async (request: string): Promise<Result<InternalRequestDefinition, OwlError>> => {
+  const requestPath = owlpaths.requestPath(request);
 
-  const requestContent = await readFile(requestPath, "utf-8");
-  const loaded = JSON.parse(requestContent) as Partial<RequestDefinition>;
-
-  // validate required fields
-  if (!loaded.url) {
-    return err("the request didn't have a url defined");
+  const resLoaded = await files.readJson<SerializedRequestDefinition>(requestPath, serializedRequestDefinitionSchema);
+  if (resLoaded.isErr()) {
+    return err({ ...resLoaded.error, error: 'err-reading-env', identifier: requestPath});
   }
+  const loaded = resLoaded.value;
 
   const method = loaded.method ?? "get";
   const headers = loaded.headers ?? [];
@@ -128,7 +195,7 @@ const loadRequest = async (request: string): Promise<Result<RequestDefinition, s
     }
   }
 
-  const constructed: RequestDefinition = {
+  const constructed: InternalRequestDefinition = {
     _key: request,
     url: loaded.url,
     description: loaded.description ?? `${method} ${loaded.url}`,
