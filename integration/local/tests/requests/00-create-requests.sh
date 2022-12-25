@@ -8,6 +8,6 @@ if ! grep -qi '"get"' '.owl/getpeople.json'; then echo "expected getpeople reque
 # expect owl create otherpeople to fail, since we don't know what a blob glorp format is
 set +e
 owlout=$(owl create otherpeople -- blob glorp http://remote:3000/people 2>&1)
-if [ $? -ne 6 ]; then echo "expected owl create to exit with code 6"; exit 1; fi
+if [ $? -ne 10 ]; then echo "expected owl create to exit with code 10"; exit 1; fi
 if [[ "$owlout" != *"err-unrecognized-request-import"* ]]; then echo "expected owl create to have err-unrecognized-request-import in output"; exit 1; fi
 set -e

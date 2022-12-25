@@ -54,6 +54,7 @@ RUN npm install && npm cache clean --force
 
 # Copy the build application
 COPY --from=0 --chown=node:node /app/dist /app/dist/
+COPY --from=0 --chown=node:node /app/help /app/help/
 
 # Running the app
 CMD "node" "dist/app.js"

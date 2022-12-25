@@ -1,2 +1,6 @@
-owlout=$(owl help err-store-not-found)
-if ! echo $owlout | grep -qi "The owl directory \(usually .owl\) was not found.)"; then echo "expected owl help to print error help"; exit 1; fi
+owlout=$(owl help err-owldir-not-found)
+if ! echo $owlout | grep -qi "The owl directory was not found."; then
+  echo "expected owl help to print error help";
+  echo -e "output was:\n$owlout"
+  exit 1;
+fi

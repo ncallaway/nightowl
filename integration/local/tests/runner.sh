@@ -4,6 +4,12 @@ successes=()
 failures=()
 skipped=()
 
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+
+
+NC='\033[0m'
+
 
 if [ ! -f /.dockerenv ]; then
   echo "NOT RUNNING IN DOCKER. REFUSING TO RUN."
@@ -34,11 +40,11 @@ for d in $TESTS_DIR/*/ ; do
       output=$(sh -e "$TESTS_DIR/$file")
 
       if [[ "$?" -eq 0 ]] ; then
-        echo -e "\t$file ✓"
+        echo -e "\t$file ${GREEN}✓${NC}"
         successes+=($file)
       else
         failed=true
-        echo -e "\t$file 🞩"
+        echo -e "\t${RED}$file 🞩${NC}"
         echo $output
         failures+=($file)
       fi

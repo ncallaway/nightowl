@@ -19,3 +19,4 @@ services:
     volumes:
       - ./integration/local/tests/:/tests:cached
       - ./dist:/owl/dist/:cached
+      - ./help:/owl/help/:cached
