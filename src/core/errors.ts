@@ -27,15 +27,16 @@ export type OwlErrorKey =
   | 'err-writing-owldir'
 
   // indicates the request definition was invalid in some way
-  | 'err-invalid-request-definition'
+  | 'err-invalid-request-def'
 
   // indicates that we tried to create a request definition that already exists
   | 'err-request-def-already-exists'
+  | 'err-request-def-not-found'
   | 'err-request-group-already-exists'
 
   // indicates an error occurred while writing the request definition to
   // disk
-  | 'err-writing-request-definition'
+  | 'err-writing-request-def'
 
   // the given import string was not recognized, and could not be imported
   | 'err-unrecognized-request-import'

@@ -21,8 +21,9 @@
     - owl list
     - owl list [prefix]
     - owl list --all
-  - [ ] owl remove <request-key>
-  - [ ] owl create <request-key> [args]
+  - [x] owl remove <request-key>
+  - [ ] owl remove -rf <request-group>
+  - [x] owl create <request-key> [args]
   - [x] owl create <request-key> -- [curl]
     - fork importers and allow calling with
     - live importers in https://github.com/Kong/insomnia/blob/5b2707cb760b901ea1f77067cc0ba92e81fb3644/packages/insomnia/src/utils/importers/importers/curl.ts

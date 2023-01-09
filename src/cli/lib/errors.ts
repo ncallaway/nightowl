@@ -14,10 +14,11 @@ export const Errors: Record<OwlErrorKey, ErrorHandler> = {
   'err-owldir-already-exists': { message: "The owl directory already exists", exitCode: 4 },
   'err-writing-owldir': { message: "Something went wrong when initalizing the owl directory", exitCode: 5 },
 
-  'err-request-def-already-exists': { message: "A request with that key already exists", exitCode: 6 },
+  'err-request-def-already-exists': { message: "A request with the key::identifier:: already exists", exitCode: 6 },
+  'err-request-def-not-found': {message: "The request definition was not found", exitCode: 20},
   'err-request-group-already-exists': { message: "A request group::identifier:: already exists", exitCode: 7 },
-  'err-invalid-request-definition': { message: "The request definition was not a valid request", exitCode: 8 },
-  'err-writing-request-definition': { message: "Something went wrong when writing the request to a file", exitCode: 9},
+  'err-invalid-request-def': { message: "The request definition was not a valid request", exitCode: 8 },
+  'err-writing-request-def': { message: "Something went wrong when writing the request to a file", exitCode: 9},
 
   'err-unrecognized-request-import': { message: "The request import format was not recognized", exitCode: 10 },
 

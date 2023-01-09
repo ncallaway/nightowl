@@ -33,4 +33,27 @@ describe("envArgsUtil", () => {
       expect(res.values.hasOwnProperty("bar")).toEqual(false);
     });
   });
+
+  describe("parseHeaderArgs", () => {
+    it("should parse = assignment", () => {
+      expect(argsUtil.parseHttpHeaderArg("Authorization=Bearer Token")).toEqual({ name: "Authorization", value: "Bearer Token" })
+      expect(argsUtil.parseHttpHeaderArg("Authorization = Bearer Token")).toEqual({ name: "Authorization", value: "Bearer Token"})
+    })
+
+    it("should parse : assignment", () => {
+      expect(argsUtil.parseHttpHeaderArg("Authorization:Bearer Token")).toEqual({ name: "Authorization", value: "Bearer Token" })
+      expect(argsUtil.parseHttpHeaderArg("Authorization : Bearer Token")).toEqual({ name: "Authorization", value: "Bearer Token" })
+      expect(argsUtil.parseHttpHeaderArg("Authorization: Bearer Token")).toEqual({ name: "Authorization", value: "Bearer Token"})
+    })
+
+    it("should prefer : assignment", () => {
+      expect(argsUtil.parseHttpHeaderArg("Authorization: Bearer=Token")).toEqual({ name: "Authorization", value: "Bearer=Token" })
+      expect(argsUtil.parseHttpHeaderArg("Authorization=Yes: Bearer Token")).toEqual({ name: "Authorization=Yes", value: "Bearer Token" })
+    })
+
+    it("should not parse other assignments", () => {
+      expect(argsUtil.parseHttpHeaderArg("Authorization Bearer Token")).toEqual(null)
+      expect(argsUtil.parseHttpHeaderArg("foobar")).toEqual(null)
+    })
+  })
 });

@@ -85,6 +85,27 @@ const parseEnvPutPatchArgs = (args: CommandLineOptions): EnvPutPatchArgs => {
   };
 };
 
+type HttpHeaderArg = {
+  name: string;
+  value: string;
+}
+
+const parseHttpHeaderArg = (arg: string): HttpHeaderArg | null => {
+  const colonSplit = arg.split(":", 2);
+  if (colonSplit.length == 2) {
+    return { name: colonSplit[0].trim(), value: colonSplit[1].trim() };
+  }
+
+  const eqSplit = arg.split("=", 2);
+  if (eqSplit.length == 2) {
+    return { name: eqSplit[0].trim(), value: eqSplit[1].trim() };
+  }
+  // return { name: "John", value: "Doe" };
+
+  return null;
+
+}
+
 const printOptionsArgs = (): OptionDefinition[] => {
   return [
     { name: "verbose", alias: "v", type: Boolean },
@@ -108,6 +129,7 @@ const outputArgs = (): OptionDefinition[] => {
 export const argsUtil = {
   parseEnvPutPatchArgs,
   parseArg,
+  parseHttpHeaderArg,
   printOptionsArgs,
   outputArgs,
 };

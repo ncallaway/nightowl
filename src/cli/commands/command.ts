@@ -2,6 +2,7 @@ import { CommandLineOptions, OptionDefinition } from "command-line-args";
 import { EnvCommand } from "./env/envCmd";
 import { RequestCommand } from "./request/requestCmd";
 import { CreateCommand } from "./request/createCmd";
+import { RemoveCommand } from "./request/removeCmd";
 import { StateCommand } from "./state/stateCmd";
 import { HistoryCommand } from "./history/historyCmd";
 import { ShowCommand } from "./history/showCmd";
@@ -31,6 +32,7 @@ const RootCommand: Command = {
       InitCommand,
       RequestCommand,
       CreateCommand,
+      RemoveCommand,
       EnvCommand,
       StateCommand,
       HistoryCommand,

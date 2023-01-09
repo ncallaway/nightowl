@@ -9,7 +9,7 @@ const _requestHeaderSchema = z.object({
   disabled: z.boolean().optional(),
 })
 // this pattern is weird and bad, but it solves this problem: https://stackoverflow.com/questions/74068609/zod-show-inferred-nested-types-in-ide
-interface RequestHeader extends z.infer<typeof _requestHeaderSchema> {}
+export interface RequestHeader extends z.infer<typeof _requestHeaderSchema> {}
 const requestHeaderSchema: z.ZodType<RequestHeader> = _requestHeaderSchema;
 
 const _requestParameterSchema = z.object({

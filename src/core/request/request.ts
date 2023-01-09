@@ -122,7 +122,7 @@ const create = async (request: string, definition: RequestDefinition): Promise<R
   // validate the serialized request
   const sresDefinition = requestDefinitionSchema.safeParse(definition);
   if (!sresDefinition.success) {
-    return err({ error: "err-invalid-request-definition", detail: zodUtil.joinErrors(sresDefinition.error)});
+    return err({ error: "err-invalid-request-def", detail: zodUtil.joinErrors(sresDefinition.error)});
   }
   definition = sresDefinition.data;
 
@@ -153,17 +153,29 @@ const create = async (request: string, definition: RequestDefinition): Promise<R
   const res = await files.writeJson(path, definition, { pretty: true, flag: "wx" });
   return res.mapErr(e => {
     if ((e as any).code == "EEXIST") {
-      return {error: "err-request-def-already-exists", detail: e}
+      return {error: "err-request-def-already-exists", detail: e, identifier: request}
     }
-    return {error: "err-writing-request-definition", detail: e}
+    return {error: "err-writing-request-def", detail: e, identifier: path}
   });
 }
+
+const del = async (request: string): Promise<Result<undefined, OwlError>> => {
+  if (!(await exists(request))) {
+    return err({error: 'err-request-def-not-found', identifier: request});
+  }
+
+  const requestPath = await owlpaths.requestPath(request);
+
+  return (await files.delete(requestPath)).mapErr(() => ({ error: "err-writing-request-def", identifier: requestPath}));
+};
+
 
 export const request = {
   convert,
   create,
   getPrompts,
   exists,
+  delete: del,
   runRequest,
 };
 
